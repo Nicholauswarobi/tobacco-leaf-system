@@ -184,26 +184,60 @@ cp saved_models/verification_metadata.json       ../backend/saved_models/
 # restart the backend — it loads the model on startup
 ```
 
-**Crop leaves are the hardest negatives** and Open Images barely covers them
-(maize, rice, cassava, coffee, tea foliage). Fold in a leaf dataset —
-PlantVillage on Kaggle is the usual choice:
+### ⚠️ What Open Images cannot give you
+
+Verified against the live V7 catalogue (601 classes): **there is no `Maize`,
+`Rice`, `Cassava`, `Common bean` or `Grass`.** Those crop leaves are exactly
+the images users mistakenly submit to a tobacco classifier, and exactly the
+hardest negatives for it to reject. No `--per-class` value fixes this — the
+data is not there.
+
+Cover the gap with a leaf dataset. [PlantVillage on
+Kaggle](https://www.kaggle.com/datasets/emmarex/plantdisease) covers maize,
+tomato, potato and pepper foliage:
 
 ```bash
 python scripts/build_verification_dataset.py --extra-negatives path/to/plantvillage
+```
+
+Do this **before** training rather than after — retraining costs another hour.
+
+### How the negative class is balanced
+
+Sources differ wildly in size — PlantVillage is ~54,000 images, an Open Images
+pull is ~4,700. Sampling that pool uniformly would make the negative class
+~92% crop leaves and leave roughly 300 images to represent every person,
+phone, car and desk, producing a gate that rejects foliage and waves a photo
+of a table straight through. Nothing in the class totals would reveal it.
+
+So the builder **round-robins across concepts** rather than shuffling: each
+class folder contributes in equal turns until its own supply runs out. Split
+directories (`train/`, `val/`, `test/`) are collapsed first, so PlantVillage's
+38 classes duplicated across two splits count once each rather than twice.
+
+The result is printed every run — check it:
+
+```
+Not_Tobacco composition (staged this run):
+   1736  50.9%  not_tobacco_source
+   1672  49.1%  PlantVillage
 ```
 
 Custom classes and dataset growth are both supported:
 
 ```bash
 python scripts/download_not_tobacco.py --list-classes --filter fruit   # what's available
-python scripts/download_not_tobacco.py --classes Tomato Maize Rice --per-class 200
+python scripts/download_not_tobacco.py --classes Tomato Potato Banana --per-class 200
 python scripts/download_not_tobacco.py --add-classes Tractor --per-class 300 --append
 python scripts/build_verification_dataset.py --append --extra-negatives ./new_photos
 ```
 
-Class names are validated against the live Open Images catalogue, with
-case-insensitive and fuzzy matching; anything unresolvable is reported and
-skipped rather than crashing the run.
+Names are resolved against the live catalogue in four passes — exact,
+case-insensitive, whole-word containment (`Sunflower` → `Common sunflower`),
+then a deliberately strict fuzzy match. Anything unresolvable is reported and
+skipped rather than guessed at: at a looser cutoff, `Rice` matched `Dice` and
+would have silently filled the negative set with photos of dice.
+`ml/tests/test_class_resolution.py` pins that behaviour down.
 
 ### Threshold calibration
 
@@ -482,8 +516,12 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ## 🧪 Testing
 
 ```bash
-# Backend smoke tests (stub predictor — no .keras needed)
+# Backend smoke tests + verification pipeline (stub predictor — no .keras needed)
 cd backend
+pytest -v
+
+# ML class-resolution tests (no network, no FiftyOne needed)
+cd ml
 pytest -v
 
 # Frontend type check

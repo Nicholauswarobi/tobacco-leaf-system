@@ -141,6 +141,78 @@ def dedupe(files: list[Path], label: str, verify_images: bool) -> list[tuple[Pat
     return unique
 
 
+# Directory names that describe a dataset *split* rather than a concept.
+# PlantVillage ships train/ and val/ each holding the same 38 classes; without
+# this, "Tomato___healthy" counts as two strata and every crop silently gets
+# double the sampling weight of an Open Images class.
+SPLIT_DIR_NAMES = {"train", "val", "valid", "validation", "test", "images", "data"}
+
+
+def stratum_key(path: Path) -> tuple[str, ...]:
+    """Identify the concept a file belongs to, ignoring split directories.
+
+    PlantVillage/train/Tomato___healthy/x.jpg
+    PlantVillage/val/Tomato___healthy/y.jpg
+        -> ('plantvillage', 'tomato___healthy')
+
+    Keeping the full parent chain (minus splits) means two sources that happen
+    to use the same class name stay separate strata.
+    """
+    parts = [p for p in path.parent.parts if p.lower() not in SPLIT_DIR_NAMES]
+    return tuple(p.lower() for p in parts)
+
+
+def stratified_sample(
+    pending: list[tuple[Path, str]], budget: int, seed: int
+) -> tuple[list[tuple[Path, str]], int]:
+    """Pick `budget` images spread evenly across their source class folders.
+
+    WHY NOT JUST SHUFFLE
+    --------------------
+    Sources differ in size by an order of magnitude. PlantVillage ships ~54,000
+    crop-leaf images; an Open Images pull is ~4,700. Sampling the combined pool
+    uniformly would fill ~92% of the negative class with crop leaves and leave
+    roughly 300 images to cover every person, phone, car and household object -
+    so the gate would learn to reject foliage and wave a photo of a desk
+    straight through.
+
+    Round-robin over class folders instead. Each concept contributes in equal
+    turns until its own supply runs out, so a 3,400-image budget spread across
+    ~77 folders yields ~44 per concept and a genuinely balanced negative class.
+    Folders with less than their share are not padded; their unused turns flow
+    to the rest.
+
+    Returns (selected, held_back).
+    """
+    rng = random.Random(seed)
+
+    strata: dict[tuple[str, ...], list[tuple[Path, str]]] = {}
+    for path, digest in pending:
+        strata.setdefault(stratum_key(path), []).append((path, digest))
+
+    for items in strata.values():
+        rng.shuffle(items)
+
+    # Deterministic stratum order, independent of filesystem iteration order.
+    order = sorted(strata.keys())
+
+    selected: list[tuple[Path, str]] = []
+    cursor = {key: 0 for key in order}
+    exhausted = False
+    while len(selected) < budget and not exhausted:
+        exhausted = True
+        for key in order:
+            if len(selected) >= budget:
+                break
+            idx = cursor[key]
+            if idx < len(strata[key]):
+                selected.append(strata[key][idx])
+                cursor[key] = idx + 1
+                exhausted = False
+
+    return selected, len(pending) - len(selected)
+
+
 def stage(
     unique: list[tuple[Path, str]],
     dest: Path,
@@ -167,15 +239,12 @@ def stage(
 
     pending = [(p, d) for p, d in unique if d[:16] not in staged]
 
-    rng = random.Random(seed)
-    rng.shuffle(pending)
-
     dropped_to_limit = 0
     if limit is not None:
         room = max(0, limit - len(staged))
-        if len(pending) > room:
-            dropped_to_limit = len(pending) - room
-            pending = pending[:room]
+        pending, dropped_to_limit = stratified_sample(pending, room, seed)
+    else:
+        random.Random(seed).shuffle(pending)
 
     copied = 0
     for path, digest in pending:
@@ -192,7 +261,12 @@ def stage(
     print(
         f"  {label:<12} copied={copied:<6} held-back={dropped_to_limit:<6} on-disk={total}"
     )
-    return {"copied": copied, "total": total, "held_back": dropped_to_limit}
+    return {
+        "copied": copied,
+        "total": total,
+        "held_back": dropped_to_limit,
+        "selected": pending,
+    }
 
 
 def source_breakdown(files: list[Path], root_hint: Path) -> Counter:
@@ -314,6 +388,27 @@ def main() -> int:
     pos_stats = stage(
         tobacco_unique, POSITIVE_DIR, "Tobacco", limit, args.seed, args.append,
     )
+
+    # Show what the negative class is actually made of. A gate trained on 92%
+    # crop leaves behaves very differently from one trained on a balanced mix,
+    # and that difference is invisible from the totals alone.
+    if neg_stats["selected"]:
+        per_source: Counter = Counter()
+        for path, _digest in neg_stats["selected"]:
+            for root in negative_sources:
+                try:
+                    path.relative_to(root)
+                    per_source[root.name] += 1
+                    break
+                except ValueError:
+                    continue
+            else:
+                per_source["(other)"] += 1
+
+        chosen = sum(per_source.values())
+        print("\nNot_Tobacco composition (staged this run):")
+        for name, n in per_source.most_common():
+            print(f"  {n:>6}  {n / chosen:>5.1%}  {name}")
 
     pos_total, neg_total = pos_stats["total"], neg_stats["total"]
     print("\n" + "=" * 62)

@@ -45,6 +45,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -55,21 +56,30 @@ DEST_ROOT = ROOT / "data" / "raw" / "not_tobacco_source"
 # Concepts requested for the negative class, grouped for readable logging.
 # Names are resolved against the live Open Images class list at runtime, so a
 # rename upstream degrades to a warning + suggestions instead of a crash.
+#
+# WHAT OPEN IMAGES DOES NOT HAVE
+# ------------------------------
+# Verified against the live V7 catalogue (601 classes): there is no Maize,
+# Rice, Cassava, Common bean or Grass. Those crop leaves are precisely the
+# images users mistakenly submit to a tobacco classifier, and precisely the
+# hardest negatives for it to reject. Open Images cannot supply them at any
+# --per-class setting.
+#
+# Cover that gap with a leaf dataset (PlantVillage on Kaggle covers maize,
+# tomato, potato and pepper foliage):
+#
+#     python scripts/build_verification_dataset.py --extra-negatives <dir>
 NEGATIVE_CLASSES: dict[str, list[str]] = {
     "crops & produce": [
         "Tomato",
         "Potato",
         "Bell pepper",
         "Banana",
-        "Common bean",
-        "Rice",
-        "Maize",
-        "Cassava",
         "Coffee",
         "Tea",
         "Vegetable",
         "Fruit",
-        "Squash",
+        "Squash (Plant)",
         "Cucumber",
         "Broccoli",
         "Cabbage",
@@ -80,10 +90,10 @@ NEGATIVE_CLASSES: dict[str, list[str]] = {
         "Flower",
         "Houseplant",
         "Plant",
-        "Grass",
         "Palm tree",
         "Rose",
-        "Sunflower",
+        "Common sunflower",
+        "Lavender (Plant)",
     ],
     "animals": [
         "Dog",
@@ -155,12 +165,33 @@ def available_classes() -> list[str]:
     return sorted(names)
 
 
+# Fuzzy matching is a last resort and is deliberately strict. At the more
+# permissive cutoff of 0.75, 'Rice' matched 'Dice' (they share 3 of 4
+# characters) and would have filled the negative set with photos of dice
+# labelled as rice. Short words are exactly where edit-distance is least
+# trustworthy, so a fuzzy hit must also start with the same letter.
+FUZZY_CUTOFF = 0.85
+
+
+def _containment_match(name: str, catalog: list[str]) -> str | None:
+    """Find a catalogue entry containing `name` as a whole word.
+
+    Open Images qualifies several concepts ('Squash (Plant)', 'Common
+    sunflower'), so whole-word containment is a far stronger signal than edit
+    distance. Prefers the shortest match, which is the most specific.
+    """
+    pattern = re.compile(rf"\b{re.escape(name.lower())}\b")
+    hits = [c for c in catalog if pattern.search(c.lower())]
+    return min(hits, key=len) if hits else None
+
+
 def resolve(requested: list[str], catalog: list[str]) -> tuple[list[str], list[str]]:
     """Map requested names onto real Open Images names.
 
-    Exact match wins, then case-insensitive, then close fuzzy match. Returns
-    (resolved, unresolved) and prints what it did - silent renaming would make
-    a half-downloaded dataset very confusing to debug later.
+    Tried in order: exact, case-insensitive, whole-word containment, strict
+    fuzzy. Returns (resolved, unresolved) and prints every substitution -
+    silent renaming would make a half-downloaded dataset very confusing to
+    debug later.
     """
     if not catalog:
         print("  ! Could not read the Open Images class list - skipping validation.")
@@ -181,10 +212,17 @@ def resolve(requested: list[str], catalog: list[str]) -> tuple[list[str], list[s
             resolved.append(hit)
             continue
 
-        close = difflib.get_close_matches(name, catalog, n=3, cutoff=0.75)
-        if len(close) == 1:
-            print(f"  ~ '{name}' -> '{close[0]}' (fuzzy)")
-            resolved.append(close[0])
+        hit = _containment_match(name, catalog)
+        if hit:
+            print(f"  ~ '{name}' -> '{hit}'")
+            resolved.append(hit)
+            continue
+
+        close = difflib.get_close_matches(name, catalog, n=3, cutoff=FUZZY_CUTOFF)
+        same_initial = [c for c in close if c[:1].lower() == name[:1].lower()]
+        if len(same_initial) == 1:
+            print(f"  ~ '{name}' -> '{same_initial[0]}' (fuzzy)")
+            resolved.append(same_initial[0])
             continue
 
         suggestion = f" Did you mean: {', '.join(close)}?" if close else ""
