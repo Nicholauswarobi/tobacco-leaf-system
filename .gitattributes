@@ -1,3 +1,5 @@
-*.keras filter=lfs diff=lfs merge=lfs -text
-*.h5 filter=lfs diff=lfs merge=lfs -text
-saved_models/** filter=lfs diff=lfs merge=lfs -text
+# Trained model weights are stored directly in Git (25-27 MB each, well under
+# GitHub's 100 MB per-file limit). "binary" keeps Git from attempting line-ending
+# normalization or text diffs on them, which would corrupt the files.
+*.keras binary
+*.h5 binary
