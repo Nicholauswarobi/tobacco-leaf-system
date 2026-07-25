@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv
+venv
+.ipynb_checkpoints
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+saved_models/*.h5
+saved_models/*.keras
+saved_models/verification_metadata.json
+outputs/*.png
+outputs/*.json
+# FiftyOne's local dataset cache, if it lands inside the repo
+.fiftyone/
+.DS_Store
