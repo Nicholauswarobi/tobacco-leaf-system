@@ -7,7 +7,7 @@ venv
 *.log
 uploads/*
 !uploads/.gitkeep
-!saved_models/*
+saved_models/*
 !saved_models/.gitkeep
 history.db
 .pytest_cache
