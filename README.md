@@ -566,6 +566,25 @@ npm run type-check
 - [x] Dockerfiles + docker-compose
 - [x] Stub-mode fallback so frontend works without trained weights
 
+## Pushing model weights to GitHub
+
+- **Use Git LFS**: Model files are large; track `.keras` and `.h5` with Git LFS before adding them.
+
+Commands to run locally:
+
+```bash
+git lfs install
+git lfs track "*.keras"
+git lfs track "*.h5"
+git add .gitattributes
+# then add model files
+git add backend/saved_models/*.keras ml/saved_models/*.keras
+git commit -m "Add trained models via Git LFS"
+git push origin <branch>
+```
+
+- **Note**: Git LFS storage/bandwidth on GitHub may be limited; consider using GitHub Releases or external storage for very large models.
+
 ## 🤝 License
 
 MIT — use it, adapt it, ship it. Built for tobacco growers and ag-tech teams.
