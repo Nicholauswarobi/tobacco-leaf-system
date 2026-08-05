@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { api, NotATobaccoLeafError } from "@/lib/api";
+import { api, NotATobaccoLeafError, WrongSectionError } from "@/lib/api";
 import { useAppStore } from "@/store/app-store";
 import { cn } from "@/lib/utils";
 import type { VerificationResult } from "@/types";
@@ -44,6 +44,10 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   // worked and the image simply is not a leaf. Tracked separately so it can be
   // shown as guidance instead of a red failure banner.
   const [rejection, setRejection] = useState<VerificationResult | null>(null);
+  // A real tobacco leaf that belongs in the other section. Separate from
+  // `rejection` because the answer is "switch tabs", not "take a new photo" —
+  // and the file the user already picked stays valid.
+  const [misrouted, setMisrouted] = useState<WrongSectionError | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const acceptFile = useCallback(
@@ -54,6 +58,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
       }
       setError(null);
       setRejection(null);
+      setMisrouted(null);
       setFile(f);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(URL.createObjectURL(f));
@@ -88,6 +93,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
     setPreviewUrl(null);
     setError(null);
     setRejection(null);
+    setMisrouted(null);
   };
 
   const submit = async () => {
@@ -95,6 +101,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
     setPredicting(true);
     setError(null);
     setRejection(null);
+    setMisrouted(null);
     try {
       let result;
       if (mode === "quality") {
@@ -105,7 +112,10 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
       setLatest(result);
       router.push("/result");
     } catch (e: unknown) {
-      if (e instanceof NotATobaccoLeafError) {
+      if (e instanceof WrongSectionError) {
+        // The leaf is fine — it just belongs in the other analysis.
+        setMisrouted(e);
+      } else if (e instanceof NotATobaccoLeafError) {
         // Verification stopped the pipeline before any analysis ran.
         setRejection(
           e.verification ?? {
@@ -220,6 +230,39 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
             </div>
           )}
         </div>
+
+        {misrouted && (
+          <div
+            role="alert"
+            className="mt-4 rounded-xl border border-sky-300 bg-sky-50 px-4 py-4 text-sm text-sky-900 dark:border-sky-800/50 dark:bg-sky-950/30 dark:text-sky-100"
+          >
+            <div className="flex items-start gap-3">
+              <Leaf className="mt-0.5 h-5 w-5 shrink-0" />
+              <div className="min-w-0">
+                <p className="font-semibold">This is a tobacco leaf.</p>
+                <p className="mt-1.5 text-sky-800/90 dark:text-sky-200/80">
+                  {misrouted.message}
+                </p>
+                <Button
+                  variant="outline"
+                  className="mt-3"
+                  onClick={() =>
+                    router.push(
+                      misrouted.suggestedMode === "quality"
+                        ? "/quality"
+                        : "/disease"
+                    )
+                  }
+                >
+                  Go to{" "}
+                  {misrouted.suggestedMode === "quality"
+                    ? "Quality Grading"
+                    : "Disease Detection"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {rejection && (
           <div

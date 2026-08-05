@@ -46,7 +46,20 @@ VERIFY_DIR = RAW / "verification"
 POSITIVE_DIR = VERIFY_DIR / "Tobacco"
 NEGATIVE_DIR = VERIFY_DIR / "Not_Tobacco"
 
-DEFAULT_TOBACCO_SOURCES = [RAW / "disease", RAW / "quality"]
+# Cured leaves must be in here, not just the green field leaves from disease/.
+# Trained without them, the gate scores a cured leaf at P(tobacco) = 0.003 and
+# rejects 100% of them, so every upload to Quality Grading is turned away as
+# "not a tobacco leaf". The cured set is also the only colour tobacco imagery
+# in the project - disease/ is entirely grayscale.
+# raw_images/ rather than processed_images/: it is the superset (every
+# download, including ones a grading quality-gate rejected), and listing both
+# would stage the same leaf twice under two different content hashes, which
+# defeats the deduplication below.
+DEFAULT_TOBACCO_SOURCES = [
+    RAW / "disease",
+    RAW / "quality",
+    ROOT / "data" / "tobacco_quality_dataset" / "raw_images",
+]
 DEFAULT_NEGATIVE_SOURCES = [RAW / "not_tobacco_source"]
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}

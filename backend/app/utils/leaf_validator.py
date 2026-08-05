@@ -92,6 +92,31 @@ def _to_hsv(image: Image.Image, size: int = 112) -> np.ndarray:
     return cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
 
 
+def _tissue_masks(hsv: np.ndarray) -> dict[str, np.ndarray]:
+    """Return each leaf-tissue colour band separately.
+
+    Kept as one source of truth: the whole-leaf screen and the fresh/cured
+    state check both compose their answers from these bands, so the ranges
+    cannot drift apart between the two.
+    """
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+
+    return {
+        # Fresh / live green leaf surface
+        "fresh_green": (h >= 40) & (h <= 75) & (s >= 50) & (v >= 50),
+        # Yellowing leaf (stress, early curing stage)
+        "yellow_green": (h >= 28) & (h <= 45) & (s >= 50) & (v >= 77),
+        # Yellow / gold (mid-to-late curing)
+        "yellow": (h >= 15) & (h <= 30) & (s >= 64) & (v >= 128),
+        # Warm brown / tan (fully cured leaf)
+        "brown": (h >= 4) & (h <= 22) & (s >= 18) & (s <= 165) & (v >= 38) & (v <= 200),
+        # Dark brown (heavily cured or necrotic tissue)
+        "dark_brown": (h >= 2) & (h <= 20) & (s >= 12) & (s <= 130) & (v >= 12) & (v <= 102),
+        # Low-saturation warm tones: shadows, underlit areas, venation texture
+        "warm_shadow": (h >= 2) & (h <= 30) & (s >= 8) & (s <= 55) & (v >= 18) & (v <= 140),
+    }
+
+
 def _build_masks(hsv: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Return (leaf_mask, non_leaf_mask) — boolean arrays of shape (H, W).
@@ -101,27 +126,15 @@ def _build_masks(hsv: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
 
-    # ── leaf-like color ranges ────────────────────────────────────────────
-
-    # Fresh / live green leaf surface
-    fresh_green   = (h >= 40) & (h <= 75) & (s >= 50) & (v >= 50)
-
-    # Yellowing leaf (stress, early curing stage)
-    yellow_green  = (h >= 28) & (h <= 45) & (s >= 50) & (v >= 77)
-
-    # Yellow / gold (mid-to-late curing)
-    yellow        = (h >= 15) & (h <= 30) & (s >= 64) & (v >= 128)
-
-    # Warm brown / tan (fully cured leaf)
-    brown         = (h >= 4)  & (h <= 22) & (s >= 18) & (s <= 165) & (v >= 38) & (v <= 200)
-
-    # Dark brown (heavily cured or necrotic tissue)
-    dark_brown    = (h >= 2)  & (h <= 20) & (s >= 12) & (s <= 130) & (v >= 12) & (v <= 102)
-
-    # Low-saturation warm tones: shadows, underlit leaf areas, venation texture
-    warm_shadow   = (h >= 2)  & (h <= 30) & (s >= 8)  & (s <= 55)  & (v >= 18) & (v <= 140)
-
-    leaf_mask = fresh_green | yellow_green | yellow | brown | dark_brown | warm_shadow
+    bands = _tissue_masks(hsv)
+    leaf_mask = (
+        bands["fresh_green"]
+        | bands["yellow_green"]
+        | bands["yellow"]
+        | bands["brown"]
+        | bands["dark_brown"]
+        | bands["warm_shadow"]
+    )
 
     # ── clearly non-leaf color ranges ─────────────────────────────────────
 
@@ -212,3 +225,88 @@ def check_is_tobacco_leaf(image: Image.Image) -> tuple[bool, str]:
         )
 
     return True, ""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Fresh vs cured leaf state (used to route uploads to the right section)
+# ─────────────────────────────────────────────────────────────────────────────
+
+STATE_FRESH = "fresh"
+STATE_CURED = "cured"
+STATE_UNKNOWN = "unknown"
+
+# Share of leaf pixels that must sit in one camp before we call it. Between
+# these two values the leaf is mid-cure (yellowing but still green) and no
+# honest call is possible, so we abstain.
+STATE_DOMINANCE: float = 0.65
+
+# Below this much leaf colour there is nothing to judge.
+STATE_MIN_LEAF_COVERAGE: float = 0.10
+
+
+def classify_leaf_state(image: Image.Image) -> tuple[str, dict]:
+    """Decide whether a leaf is fresh (green, field) or cured (dried).
+
+    WHY THIS IS A COLOUR RULE AND NOT A MODEL
+    -----------------------------------------
+    Curing *is* the colour change: a green leaf turns lemon, orange then
+    mahogany. Hue is the physical signal, not a proxy for it, so a rule over
+    hue is both more robust and more explainable here than a CNN.
+
+    It is also the only honest option available. Every image in
+    ml/data/raw/disease/ is stored grayscale (mean saturation 0.000), while the
+    cured-leaf dataset is full colour. A model trained to separate those two
+    folders would learn "has colour == cured" and score ~100% while being
+    worthless on a real colour photo of a green leaf.
+
+    Returns (state, evidence). ``state`` is STATE_FRESH, STATE_CURED or
+    STATE_UNKNOWN. Callers must treat STATE_UNKNOWN as "cannot tell" and let
+    the upload through - abstention must never block a farmer.
+    """
+    if is_effectively_grayscale(image):
+        return STATE_UNKNOWN, {
+            "reason": "image carries no colour information",
+            "green_share": None,
+            "cured_share": None,
+            "leaf_coverage": None,
+        }
+
+    hsv = _to_hsv(image)
+    bands = _tissue_masks(hsv)
+
+    green = bands["fresh_green"]
+    # Yellow through mahogany: the colours a leaf only takes on once cured.
+    # warm_shadow is excluded - it is a low-saturation catch-all that fires on
+    # shaded parts of green leaves too, so it carries no state information.
+    cured = bands["yellow"] | bands["brown"] | bands["dark_brown"]
+
+    green_px = float(green.sum())
+    cured_px = float(cured.sum())
+    decided_px = green_px + cured_px
+    coverage = decided_px / green.size
+
+    evidence = {
+        "green_share": round(green_px / decided_px, 3) if decided_px else None,
+        "cured_share": round(cured_px / decided_px, 3) if decided_px else None,
+        "leaf_coverage": round(coverage, 3),
+    }
+
+    if coverage < STATE_MIN_LEAF_COVERAGE or decided_px == 0:
+        evidence["reason"] = "too little leaf tissue to judge"
+        return STATE_UNKNOWN, evidence
+
+    green_share = green_px / decided_px
+    cured_share = cured_px / decided_px
+
+    if cured_share >= STATE_DOMINANCE:
+        evidence["reason"] = f"{cured_share:.0%} of leaf pixels are cured tones"
+        return STATE_CURED, evidence
+    if green_share >= STATE_DOMINANCE:
+        evidence["reason"] = f"{green_share:.0%} of leaf pixels are green"
+        return STATE_FRESH, evidence
+
+    evidence["reason"] = (
+        f"mixed colouring ({green_share:.0%} green, {cured_share:.0%} cured) - "
+        "the leaf may be part-way through curing"
+    )
+    return STATE_UNKNOWN, evidence

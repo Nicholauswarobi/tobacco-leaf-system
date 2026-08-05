@@ -18,6 +18,7 @@ from app.services.prediction_service import (
 from app.services.verification_service import (
     verification_service,
     NotATobaccoLeafError,
+    WrongSectionError,
 )
 from app.services.history_service import history_service
 from app.schemas.prediction import (
@@ -84,7 +85,7 @@ async def predict_disease(file: UploadFile = File(...)) -> PredictionResponse:
 
     try:
         result = predict_disease_only(image, image_url=public_url, verification=outcome)
-    except NotATobaccoLeafError:
+    except (NotATobaccoLeafError, WrongSectionError):
         raise  # handled globally — keeps one rejection shape across the API
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
@@ -112,7 +113,7 @@ async def predict_quality(file: UploadFile = File(...)) -> PredictionResponse:
 
     try:
         result = predict_quality_only(image, image_url=public_url, verification=outcome)
-    except NotATobaccoLeafError:
+    except (NotATobaccoLeafError, WrongSectionError):
         raise
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
@@ -148,7 +149,7 @@ async def predict(
             result = predict_disease_only(image, image_url=public_url, verification=outcome)
         else:
             result = predict_full(image, image_url=public_url, verification=outcome)
-    except NotATobaccoLeafError:
+    except (NotATobaccoLeafError, WrongSectionError):
         raise
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(

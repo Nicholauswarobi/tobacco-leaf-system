@@ -34,6 +34,7 @@ from scripts.quality_dataset.build import (  # noqa: E402
     build_plan,
     drop_exact_duplicates,
     group_by_code,
+    reset_derived_outputs,
 )
 
 
@@ -184,3 +185,44 @@ def test_build_plan_balances_grades_and_quarantines_undefined_codes():
     assert review_codes <= set(config.UNDEFINED_CODES)
     assert len(review) == 50
     assert set(buckets) == {"L1L", "L2O", "L3L", "L3O", "L4L", "L5R", "LG", "LND"}
+
+
+# --------------------------------------------------------------------------
+# Re-running the build must not leave strays behind
+# --------------------------------------------------------------------------
+
+
+def test_rerun_clears_stale_images_but_keeps_the_download_cache(tmp_path, monkeypatch):
+    """A second run with a smaller --target must not leave images from the
+    first run in the grade folders.
+
+    Those strays are never overwritten (different sample, different filenames)
+    and never listed in metadata.csv, so the training set quietly gains images
+    with no provenance row and the statistics stop matching the folders.
+    Nothing errors, and a folder listing looks perfectly normal.
+    """
+    monkeypatch.setattr(config, "DATASET_ROOT", tmp_path)
+    monkeypatch.setattr(config, "PROCESSED_DIR", tmp_path / "processed_images")
+    monkeypatch.setattr(config, "RAW_DIR", tmp_path / "raw_images")
+    monkeypatch.setattr(config, "DUPLICATES_DIR", tmp_path / "duplicates")
+    monkeypatch.setattr(config, "REJECTED_DIR", tmp_path / "rejected_images")
+    monkeypatch.setattr(config, "REVIEW_DIR", tmp_path / "needs_manual_review")
+
+    stale = config.PROCESSED_DIR / "Grade_C" / "C_L5O_999.jpg"
+    stale.parent.mkdir(parents=True)
+    stale.write_bytes(b"stale")
+
+    reviewed = config.REVIEW_DIR / "LG" / "review_LG_1.jpg"
+    reviewed.parent.mkdir(parents=True)
+    reviewed.write_bytes(b"stale")
+
+    cached = config.RAW_DIR / "L1L" / "123_uyui_1.jpg"
+    cached.parent.mkdir(parents=True)
+    cached.write_bytes(b"downloaded")
+
+    reset_derived_outputs()
+
+    assert not stale.exists()
+    assert not reviewed.exists()
+    # The download cache is what makes the build resumable - never clear it.
+    assert cached.exists(), "raw_images/ must survive so re-runs skip downloads"

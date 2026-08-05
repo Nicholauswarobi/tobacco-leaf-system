@@ -81,6 +81,33 @@ class NotATobaccoLeafError(ValueError):
         self.outcome = outcome
 
 
+class WrongSectionError(ValueError):
+    """Raised when a genuine tobacco leaf was sent to the wrong analysis.
+
+    Deliberately distinct from NotATobaccoLeafError. Telling a farmer "this is
+    not a tobacco leaf" when they photographed a perfectly good cured leaf and
+    merely opened the wrong tab is both wrong and infuriating. This says "yes,
+    that is tobacco - it belongs in the other section", and names the section.
+    """
+
+    def __init__(
+        self,
+        detected_state: str,
+        attempted_mode: str,
+        suggested_mode: str,
+        message: str,
+        evidence: dict,
+        outcome: "VerificationOutcome",
+    ) -> None:
+        super().__init__(message)
+        self.detected_state = detected_state
+        self.attempted_mode = attempted_mode
+        self.suggested_mode = suggested_mode
+        self.message = message
+        self.evidence = evidence
+        self.outcome = outcome
+
+
 @dataclass
 class VerificationOutcome:
     """The verdict, plus everything needed to explain it."""

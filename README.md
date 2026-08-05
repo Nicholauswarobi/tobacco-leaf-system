@@ -339,6 +339,10 @@ folder's `README.md` for the mapping rationale and caveats.
 
 ### 2. Install ML deps & train
 
+> **Retraining runbook: [`ml/TRAINING.md`](ml/TRAINING.md)** — step-by-step
+> commands for the verification gate and the quality model, in the order they
+> have to be run, with the checks that catch a silently broken result.
+
 ```bash
 cd ml
 python -m venv .venv

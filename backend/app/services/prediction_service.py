@@ -26,8 +26,14 @@ from app.services.verification_service import (
     verification_service,
     VerificationOutcome,
     NotATobaccoLeafError,
+    WrongSectionError,
     FAILURE_MESSAGE,
     METHOD_COLOR,
+)
+from app.utils.leaf_validator import (
+    classify_leaf_state,
+    STATE_CURED,
+    STATE_FRESH,
 )
 
 # Applies only while the verification model is untrained — see
@@ -38,10 +44,64 @@ MIN_LEAF_CONFIDENCE: float = 0.65
 # exception now lives with the service that raises it.
 __all__ = [
     "NotATobaccoLeafError",
+    "WrongSectionError",
     "predict_disease_only",
     "predict_quality_only",
     "predict_full",
 ]
+
+
+# ── Stage 2: is this leaf in the right section? ──────────────────────────────
+#
+# Disease detection is trained on fresh green leaves growing in the field.
+# Quality grading is trained on cured (dried) leaves on the grading table.
+# They are different subjects, so an image sent to the wrong one gets a
+# confident, meaningless answer. This routes instead of guessing.
+_SECTION_RULES = {
+    # attempted mode -> (state that does NOT belong here, where it should go)
+    "disease": (
+        STATE_CURED,
+        "quality",
+        "This is a tobacco leaf, but it is a *cured* (dried) leaf. Disease "
+        "detection works on fresh green leaves from the field. Upload this "
+        "image under Quality Grading instead.",
+    ),
+    "quality": (
+        STATE_FRESH,
+        "disease",
+        "This is a tobacco leaf, but it is a *fresh green* leaf. Quality "
+        "grading works on cured (dried) leaves after harvest. Upload this "
+        "image under Disease Detection instead.",
+    ),
+}
+
+
+def _assert_right_section(
+    image: Image.Image, mode: str, verification: VerificationOutcome
+) -> tuple[str, dict]:
+    """Raise WrongSectionError if a tobacco leaf was sent to the wrong analysis.
+
+    Only ever fires on a *confident* mismatch. A leaf part-way through curing,
+    or a grayscale photo, classifies as unknown and is allowed straight
+    through - refusing to analyse because we could not tell would be worse
+    than analysing.
+    """
+    state, evidence = classify_leaf_state(image)
+    rule = _SECTION_RULES.get(mode)
+    if rule is None:
+        return state, evidence
+
+    blocked_state, suggested_mode, message = rule
+    if state == blocked_state:
+        raise WrongSectionError(
+            detected_state=state,
+            attempted_mode=mode,
+            suggested_mode=suggested_mode,
+            message=message,
+            evidence=evidence,
+            outcome=verification,
+        )
+    return state, evidence
 
 
 # ── Stage 1: Tobacco Verification (runs before ANY downstream model) ─────────
@@ -218,6 +278,8 @@ def predict_disease_only(
     # Stage 1: Tobacco Verification — the disease model is not touched unless
     # this passes.
     verification = _verify(image, verification)
+    # Stage 2: right subject for this model? A cured leaf gets sent to Quality.
+    _assert_right_section(image, "disease", verification)
 
     started = time.perf_counter()
     disease_probs = model_service.predict_disease(image)
@@ -272,6 +334,8 @@ def predict_quality_only(
     # Stage 1: Tobacco Verification — the quality model is not touched unless
     # this passes.
     verification = _verify(image, verification)
+    # Stage 2: right subject for this model? A fresh leaf gets sent to Disease.
+    _assert_right_section(image, "quality", verification)
 
     started = time.perf_counter()
 

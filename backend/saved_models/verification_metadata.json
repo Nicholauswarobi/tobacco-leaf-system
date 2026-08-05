@@ -4,11 +4,11 @@
     "Tobacco"
   ],
   "tobacco_index": 1,
-  "threshold": 0.15,
+  "threshold": 0.45,
   "image_size": 224,
   "input_range": "[0, 255] raw RGB - normalisation is baked into the graph",
   "colour_stripped_in_graph": true,
-  "roc_auc": 0.9998815640437051,
-  "not_tobacco_recall": 0.997,
-  "tobacco_recall": 0.9985
+  "roc_auc": 0.9998946360153257,
+  "not_tobacco_recall": 1.0,
+  "tobacco_recall": 0.9986
 }

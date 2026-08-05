@@ -18,6 +18,17 @@ const API_BASE =
 /** Backend code for a Tobacco Verification rejection. */
 export const NOT_A_TOBACCO_LEAF = "NOT_A_TOBACCO_LEAF";
 
+/** Backend code for a real tobacco leaf sent to the wrong analysis. */
+export const WRONG_SECTION = "WRONG_SECTION";
+
+export interface RoutingHint {
+  is_tobacco: boolean;
+  detected_state: "fresh" | "cured" | "unknown";
+  attempted_mode: "disease" | "quality";
+  suggested_mode: "disease" | "quality";
+  evidence?: Record<string, unknown>;
+}
+
 /**
  * Thrown when the Tobacco Verification Model rejects an upload.
  *
@@ -35,6 +46,27 @@ export class NotATobaccoLeafError extends Error {
   }
 }
 
+/**
+ * Thrown when a genuine tobacco leaf was uploaded to the wrong analysis.
+ *
+ * Deliberately not a NotATobaccoLeafError: the image *is* tobacco, and telling
+ * someone otherwise when they merely opened the wrong tab is both wrong and
+ * infuriating. The UI should offer to move them to `suggestedMode`.
+ */
+export class WrongSectionError extends Error {
+  readonly routing: RoutingHint;
+
+  constructor(message: string, routing: RoutingHint) {
+    super(message);
+    this.name = "WrongSectionError";
+    this.routing = routing;
+  }
+
+  get suggestedMode(): "disease" | "quality" {
+    return this.routing.suggested_mode;
+  }
+}
+
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
@@ -44,8 +76,12 @@ async function handle<T>(res: Response): Promise<T> {
       if (body.code === NOT_A_TOBACCO_LEAF) {
         throw new NotATobaccoLeafError(message, body.verification);
       }
+      if (body.code === WRONG_SECTION && body.routing) {
+        throw new WrongSectionError(message, body.routing as RoutingHint);
+      }
     } catch (e) {
       if (e instanceof NotATobaccoLeafError) throw e;
+      if (e instanceof WrongSectionError) throw e;
       /* non-JSON error body — fall through to the generic error */
     }
     throw new Error(message);

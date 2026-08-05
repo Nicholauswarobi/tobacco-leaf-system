@@ -2,34 +2,36 @@
 
 Generated: 2026-08-05
 
-**Total images: 60**
+**Total images: 2,965**
 
 ## Class distribution
 
 | Grade | Images | Share |
 | --- | ---: | ---: |
-| Grade_A | 20 | 33.3% |
-| Grade_B | 20 | 33.3% |
-| Grade_C | 20 | 33.3% |
+| Grade_A | 993 | 33.5% |
+| Grade_B | 991 | 33.4% |
+| Grade_C | 981 | 33.1% |
 
-Class balance: 1.00:1 (largest:smallest class)
+Class balance: 1.01:1 (largest:smallest class)
 
 ## Source grade codes feeding each class
 
-- **Grade_A** &larr; L1L (4), L1O (2), L1OF (2), L2L (5), L2O (3), L2OF (4)
-- **Grade_B** &larr; L3L (9), L3O (7), L3OF (4)
-- **Grade_C** &larr; L4L (3), L4O (5), L4R (1), L5L (4), L5O (4), L5R (3)
+- **Grade_A** &larr; L1L (197), L1O (78), L1OF (112), L2L (270), L2O (147), L2OF (187), L2R (2)
+- **Grade_B** &larr; L3L (426), L3O (332), L3OF (217), L3R (16)
+- **Grade_C** &larr; L4L (158), L4O (299), L4R (35), L5L (173), L5O (185), L5R (131)
 
 ## Resolution
 
 | Resolution | Images |
 | --- | ---: |
-| 960x1440 | 60 |
+| 960x1440 | 2,965 |
 
 ## Quality control
 
-- Sharpness (variance of Laplacian): min 1593.85, median 2519.12, max 5937.49
+- Sharpness (variance of Laplacian): min 961.5, median 2683.11, max 6897.48
 - Rejected images: 0
-- Duplicates removed: 0
+- Duplicates removed: 35
+  - near (dhash <= 6): 34
+  - exact (md5): 1
 
-- Processed images on disk: 0.02 GB
+- Processed images on disk: 1.19 GB

@@ -85,10 +85,21 @@ def test_rejected_image_is_not_saved_to_history(verification_model, image_bytes)
 # Acceptance continues the pipeline
 # ---------------------------------------------------------------------------
 
+# Green reads as a fresh field leaf and gold as a cured one, so each route has
+# to be fed the leaf state it actually analyses - otherwise the section routing
+# (correctly) turns the upload away and this test would be asserting the wrong
+# thing about the verification gate.
+ROUTE_APPROPRIATE_COLOUR = {
+    "/api/predict/quality": (198, 142, 46),   # cured gold
+}
+DEFAULT_LEAF_COLOUR = (34, 139, 34)           # fresh green
+
+
 @pytest.mark.parametrize("route", PREDICT_ROUTES)
 @pytest.mark.parametrize("verification_model", [TOBACCO], indirect=True)
 def test_tobacco_continues_to_downstream_models(route, verification_model, image_bytes):
-    r = client.post(route, files=_files(image_bytes()))
+    colour = ROUTE_APPROPRIATE_COLOUR.get(route, DEFAULT_LEAF_COLOUR)
+    r = client.post(route, files=_files(image_bytes(color=colour)))
 
     assert r.status_code == 200, r.text
     body = r.json()

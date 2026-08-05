@@ -1,72 +1,79 @@
 {
   "generated": "2026-08-05",
-  "total_images": 60,
+  "total_images": 2965,
   "per_grade": {
-    "Grade_A": 20,
-    "Grade_B": 20,
-    "Grade_C": 20
+    "Grade_A": 993,
+    "Grade_B": 991,
+    "Grade_C": 981
   },
   "per_grade_share": {
-    "Grade_A": "33.3%",
-    "Grade_B": "33.3%",
-    "Grade_C": "33.3%"
+    "Grade_A": "33.5%",
+    "Grade_B": "33.4%",
+    "Grade_C": "33.1%"
   },
-  "class_balance": "1.00:1 (largest:smallest class)",
+  "class_balance": "1.01:1 (largest:smallest class)",
   "per_original_label": {
-    "L1L": 4,
-    "L1O": 2,
-    "L1OF": 2,
-    "L2L": 5,
-    "L2O": 3,
-    "L2OF": 4,
-    "L3L": 9,
-    "L3O": 7,
-    "L3OF": 4,
-    "L4L": 3,
-    "L4O": 5,
-    "L4R": 1,
-    "L5L": 4,
-    "L5O": 4,
-    "L5R": 3
+    "L1L": 197,
+    "L1O": 78,
+    "L1OF": 112,
+    "L2L": 270,
+    "L2O": 147,
+    "L2OF": 187,
+    "L2R": 2,
+    "L3L": 426,
+    "L3O": 332,
+    "L3OF": 217,
+    "L3R": 16,
+    "L4L": 158,
+    "L4O": 299,
+    "L4R": 35,
+    "L5L": 173,
+    "L5O": 185,
+    "L5R": 131
   },
   "original_labels_per_grade": {
     "Grade_A": {
-      "L1L": 4,
-      "L1O": 2,
-      "L1OF": 2,
-      "L2L": 5,
-      "L2O": 3,
-      "L2OF": 4
+      "L1L": 197,
+      "L1O": 78,
+      "L1OF": 112,
+      "L2L": 270,
+      "L2O": 147,
+      "L2OF": 187,
+      "L2R": 2
     },
     "Grade_B": {
-      "L3L": 9,
-      "L3O": 7,
-      "L3OF": 4
+      "L3L": 426,
+      "L3O": 332,
+      "L3OF": 217,
+      "L3R": 16
     },
     "Grade_C": {
-      "L4L": 3,
-      "L4O": 5,
-      "L4R": 1,
-      "L5L": 4,
-      "L5O": 4,
-      "L5R": 3
+      "L4L": 158,
+      "L4O": 299,
+      "L4R": 35,
+      "L5L": 173,
+      "L5O": 185,
+      "L5R": 131
     }
   },
   "resolutions": {
-    "960x1440": 60
+    "960x1440": 2965
   },
   "sharpness_laplacian_var": {
-    "min": 1593.85,
-    "median": 2519.12,
-    "max": 5937.49
+    "min": 961.5,
+    "median": 2683.11,
+    "max": 6897.48
   },
-  "bytes_on_disk_processed": 23945420,
+  "bytes_on_disk_processed": 1186139988,
   "rejected": {
     "count": 0,
     "reasons": {}
   },
   "duplicates_removed": {
-    "count": 0,
-    "kinds": {}
+    "count": 35,
+    "kinds": {
+      "near (dhash <= 6)": 34,
+      "exact (md5)": 1
+    }
   }
 }

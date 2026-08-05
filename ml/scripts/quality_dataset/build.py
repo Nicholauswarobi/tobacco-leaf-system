@@ -324,6 +324,34 @@ def download_all(
     return landed
 
 
+def reset_derived_outputs() -> None:
+    """Clear everything curation regenerates, so a re-run cannot leave strays.
+
+    raw_images/ is deliberately kept - it is the download cache that makes the
+    build resumable.
+
+    Without this, a run with a smaller --target leaves images from a previous,
+    larger sample sitting in the grade folders. They are never overwritten
+    (different sample, different filenames) and never listed in metadata.csv,
+    so the training set silently ends up with images that have no provenance
+    row - and the counts in the statistics report stop matching the folders.
+    """
+    for grade in config.GRADES:
+        shutil.rmtree(config.PROCESSED_DIR / grade, ignore_errors=True)
+    for folder in (config.DUPLICATES_DIR, config.REJECTED_DIR, config.REVIEW_DIR):
+        shutil.rmtree(folder, ignore_errors=True)
+
+    # Root-level Grade_* are junctions into processed_images. Removing the
+    # target leaves them dangling, so drop them too and relink afterwards.
+    for grade in config.GRADES:
+        link = config.DATASET_ROOT / grade
+        if link.is_symlink() or link.is_dir():
+            try:
+                link.rmdir()  # a junction/symlink to a now-missing target
+            except OSError:
+                shutil.rmtree(link, ignore_errors=True)
+
+
 def downloaded_on(path: Path) -> str:
     """When this file actually arrived.
 
@@ -526,6 +554,7 @@ def main(argv: list[str] | None = None) -> int:
     download_all(everything, args.workers, limiter)
 
     print("\nCurating ...")
+    reset_derived_outputs()
     index = curate.DuplicateIndex()
     metadata: list[dict] = []
     rejected: list[dict] = []
