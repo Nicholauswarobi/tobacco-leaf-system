@@ -1,0 +1,72 @@
+{
+  "generated": "2026-08-05",
+  "total_images": 60,
+  "per_grade": {
+    "Grade_A": 20,
+    "Grade_B": 20,
+    "Grade_C": 20
+  },
+  "per_grade_share": {
+    "Grade_A": "33.3%",
+    "Grade_B": "33.3%",
+    "Grade_C": "33.3%"
+  },
+  "class_balance": "1.00:1 (largest:smallest class)",
+  "per_original_label": {
+    "L1L": 4,
+    "L1O": 2,
+    "L1OF": 2,
+    "L2L": 5,
+    "L2O": 3,
+    "L2OF": 4,
+    "L3L": 9,
+    "L3O": 7,
+    "L3OF": 4,
+    "L4L": 3,
+    "L4O": 5,
+    "L4R": 1,
+    "L5L": 4,
+    "L5O": 4,
+    "L5R": 3
+  },
+  "original_labels_per_grade": {
+    "Grade_A": {
+      "L1L": 4,
+      "L1O": 2,
+      "L1OF": 2,
+      "L2L": 5,
+      "L2O": 3,
+      "L2OF": 4
+    },
+    "Grade_B": {
+      "L3L": 9,
+      "L3O": 7,
+      "L3OF": 4
+    },
+    "Grade_C": {
+      "L4L": 3,
+      "L4O": 5,
+      "L4R": 1,
+      "L5L": 4,
+      "L5O": 4,
+      "L5R": 3
+    }
+  },
+  "resolutions": {
+    "960x1440": 60
+  },
+  "sharpness_laplacian_var": {
+    "min": 1593.85,
+    "median": 2519.12,
+    "max": 5937.49
+  },
+  "bytes_on_disk_processed": 23945420,
+  "rejected": {
+    "count": 0,
+    "reasons": {}
+  },
+  "duplicates_removed": {
+    "count": 0,
+    "kinds": {}
+  }
+}

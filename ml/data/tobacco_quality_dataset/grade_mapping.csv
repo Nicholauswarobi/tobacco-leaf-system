@@ -1,0 +1,23 @@
+original_label,plant_position,quality_tier,quality_name,colour,special_factor,mapped_grade,mapping_reason
+L1L,Leaf,1,Choice,Lemon,,Grade_A,quality digit 1 = Choice quality -> Grade_A
+L1O,Leaf,1,Choice,Orange,,Grade_A,quality digit 1 = Choice quality -> Grade_A
+L1OF,Leaf,1,Choice,Orange,F,Grade_A,quality digit 1 = Choice quality -> Grade_A
+L2L,Leaf,2,Fine,Lemon,,Grade_A,quality digit 2 = Fine quality -> Grade_A
+L2O,Leaf,2,Fine,Orange,,Grade_A,quality digit 2 = Fine quality -> Grade_A
+L2OF,Leaf,2,Fine,Orange,F,Grade_A,quality digit 2 = Fine quality -> Grade_A
+L2R,Leaf,2,Fine,Mahogany,,Grade_A,quality digit 2 = Fine quality -> Grade_A
+L3L,Leaf,3,Good,Lemon,,Grade_B,quality digit 3 = Good quality -> Grade_B
+L3O,Leaf,3,Good,Orange,,Grade_B,quality digit 3 = Good quality -> Grade_B
+L3OF,Leaf,3,Good,Orange,F,Grade_B,quality digit 3 = Good quality -> Grade_B
+L3R,Leaf,3,Good,Mahogany,,Grade_B,quality digit 3 = Good quality -> Grade_B
+L4L,Leaf,4,Fair,Lemon,,Grade_C,quality digit 4 = Fair quality -> Grade_C
+L4O,Leaf,4,Fair,Orange,,Grade_C,quality digit 4 = Fair quality -> Grade_C
+L4R,Leaf,4,Fair,Mahogany,,Grade_C,quality digit 4 = Fair quality -> Grade_C
+L5L,Leaf,5,Low,Lemon,,Grade_C,quality digit 5 = Low quality -> Grade_C
+L5O,Leaf,5,Low,Orange,,Grade_C,quality digit 5 = Low quality -> Grade_C
+L5R,Leaf,5,Low,Mahogany,,Grade_C,quality digit 5 = Low quality -> Grade_C
+LG,Leaf,,undefined,undefined,,UNMAPPED,"Leaf, off-grade code not defined in the source paper; no quality digit, so no grade can be assigned without guessing"
+LK,Leaf,,undefined,undefined,,UNMAPPED,"Leaf, off-grade code not defined in the source paper; no quality digit, so no grade can be assigned without guessing"
+LLV,Leaf,,undefined,undefined,,UNMAPPED,"Leaf, off-grade code not defined in the source paper; no quality digit, so no grade can be assigned without guessing"
+LND,Leaf,,undefined,undefined,,UNMAPPED,"Leaf, off-grade code not defined in the source paper; no quality digit, so no grade can be assigned without guessing"
+LOV,Leaf,,undefined,undefined,,UNMAPPED,"Leaf, off-grade code not defined in the source paper; no quality digit, so no grade can be assigned without guessing"

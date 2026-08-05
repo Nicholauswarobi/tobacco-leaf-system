@@ -6,6 +6,14 @@ venv
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
+# Multi-GB image corpus rebuilt by scripts/quality_dataset/build.py; the
+# reports and CSVs it produces are small enough to keep.
+data/tobacco_quality_dataset/*
+!data/tobacco_quality_dataset/README.md
+!data/tobacco_quality_dataset/metadata.csv
+!data/tobacco_quality_dataset/grade_mapping.csv
+!data/tobacco_quality_dataset/reports/
+data/tobacco_quality_dataset/reports/source_index_*.json
 saved_models/*.h5
 saved_models/*.keras
 saved_models/verification_metadata.json

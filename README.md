@@ -317,6 +317,26 @@ Suggested public sources for tobacco leaf datasets:
 
 Aim for ≥200 images per class, balanced.
 
+**Option C: build the quality dataset automatically.**
+
+`ml/scripts/quality_dataset/` downloads and curates real *cured* tobacco leaf
+images graded A/B/C, so the quality model no longer has to train on the random
+labels `generate_quality_data.py` produces:
+
+```bash
+cd ml
+python -m scripts.quality_dataset.build --plan-only     # show the plan, download nothing
+python -m scripts.quality_dataset.build --target 10000  # ~1 hour, ~7 GB
+```
+
+Images come from Harvard Dataverse [`doi:10.7910/DVN/TTPLFT`](https://doi.org/10.7910/DVN/TTPLFT)
+(CC0) — 49,778 photographs of flue-cured leaves shot on Tanzanian grading
+tables. Grades are derived from the quality digit in each leaf's official
+Tanzanian grade code, not guessed. The build writes
+`ml/data/tobacco_quality_dataset/` with `Grade_A/`, `Grade_B/`, `Grade_C/`,
+a metadata CSV, a grade-mapping table and a statistics report; see that
+folder's `README.md` for the mapping rationale and caveats.
+
 ### 2. Install ML deps & train
 
 ```bash
