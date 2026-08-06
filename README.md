@@ -318,7 +318,7 @@ Suggested public sources for tobacco leaf datasets:
 Aim for ≥200 images per class, balanced.
 
 **Option C: build the quality dataset automatically.**
-
+switcher 
 `ml/scripts/quality_dataset/` downloads and curates real *cured* tobacco leaf
 images graded A/B/C, so the quality model no longer has to train on the random
 labels `generate_quality_data.py` produces:
