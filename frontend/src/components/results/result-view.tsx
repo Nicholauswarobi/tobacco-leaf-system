@@ -14,6 +14,8 @@ import {
   Clock,
   Sparkles,
   Info,
+  ImagePlus,
+  Pill,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -23,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConfidenceBar } from "@/components/results/confidence-bar";
 import { api } from "@/lib/api";
 import { formatPercent, formatDate } from "@/lib/utils";
+import type { DiseaseTreatment } from "@/types";
 
 const isHealthy = (label: string) => label.toLowerCase() === "healthy";
 const gradeTone = (g: string) => {
@@ -53,6 +56,19 @@ export function ResultView() {
   const showDisease = mode === "disease" || mode === "full";
   const showQuality = mode === "quality" || mode === "full";
 
+  // Send the user back to the section this analysis came from, so uploading
+  // again lands in the right model instead of the generic upload page.
+  const sameSectionHref =
+    mode === "quality" ? "/quality" : mode === "disease" ? "/disease" : "/upload";
+  const sameSectionLabel =
+    mode === "quality" ? "Quality Grading" : mode === "disease" ? "Disease Detection" : "Full analysis";
+  const otherSectionHref = mode === "quality" ? "/disease" : "/quality";
+  const otherSectionLabel =
+    mode === "quality" ? "Disease Detection" : "Quality Grading";
+
+  /** Straight back to the same analysis page, ready for the next photo. */
+  const analyzeAnother = () => router.push(sameSectionHref);
+
   const exportJson = () => {
     const blob = new Blob([JSON.stringify(latest, null, 2)], {
       type: "application/json",
@@ -75,7 +91,7 @@ export function ResultView() {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Folium diagnosis", text });
+        await navigator.share({ title: "TobaccoScan diagnosis", text });
       } catch {
         /* user cancelled */
       }
@@ -109,13 +125,17 @@ export function ResultView() {
       {/* Top bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <Link
-          href="/upload"
+          href={sameSectionHref}
           className="inline-flex items-center gap-2 text-sm text-[var(--fg-muted)] hover:text-[var(--fg)]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Analyze another leaf
+          Back to {sameSectionLabel}
         </Link>
         <div className="flex flex-wrap gap-2">
+          <Button variant="primary" size="sm" onClick={analyzeAnother}>
+            <ImagePlus className="h-4 w-4" />
+            Upload another leaf
+          </Button>
           <Button variant="outline" size="sm" onClick={share}>
             <Share2 className="h-4 w-4" />
             Share
@@ -253,21 +273,27 @@ export function ResultView() {
                 ))}
               </div>
 
-              {disease.recommendations.length > 0 && (
-                <div className="mt-7 rounded-2xl bg-leaf-50 dark:bg-leaf-900/30 border border-leaf-200/60 dark:border-leaf-700/30 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
-                    <h3 className="font-display text-lg">Recommendations</h3>
+              {/* What to do now. Falls back to the plain recommendation list
+                  for results saved before treatments were returned. */}
+              {disease.treatment ? (
+                <TreatmentPanel treatment={disease.treatment} healthy={healthy} />
+              ) : (
+                disease.recommendations.length > 0 && (
+                  <div className="mt-7 rounded-2xl bg-leaf-50 dark:bg-leaf-900/30 border border-leaf-200/60 dark:border-leaf-700/30 p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
+                      <h3 className="font-display text-lg">Recommendations</h3>
+                    </div>
+                    <ul className="space-y-2.5">
+                      {disease.recommendations.map((r) => (
+                        <li key={r} className="flex items-start gap-2.5 text-sm">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-leaf-700 dark:text-leaf-300 shrink-0" />
+                          <span className="text-[var(--fg)]">{r}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="space-y-2.5">
-                    {disease.recommendations.map((r) => (
-                      <li key={r} className="flex items-start gap-2.5 text-sm">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 text-leaf-700 dark:text-leaf-300 shrink-0" />
-                        <span className="text-[var(--fg)]">{r}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                )
               )}
             </motion.div>
           )}
@@ -339,6 +365,103 @@ export function ResultView() {
           )}
         </div>
       </div>
+
+      {/* ── Analyze again ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25 }}
+        className="mt-8 flex flex-col gap-4 rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-7 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <h3 className="font-display text-2xl tracking-tight">
+            Analyze another leaf
+          </h3>
+          <p className="mt-1.5 text-sm text-[var(--fg-muted)]">
+            Upload the next photo in {sameSectionLabel}, or switch section.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button onClick={analyzeAnother}>
+            <ImagePlus className="h-4 w-4" />
+            Upload in {sameSectionLabel}
+          </Button>
+          {mode !== "full" && (
+            <Button
+              variant="outline"
+              onClick={() => router.push(otherSectionHref)}
+            >
+              Go to {otherSectionLabel}
+            </Button>
+          )}
+        </div>
+      </motion.div>
     </section>
+  );
+}
+
+/**
+ * What to do about the detected disease: the medicine to spray, its rate and
+ * interval, and two or three field actions. Kept short on purpose — this is
+ * read on a phone in the field, not at a desk.
+ */
+function TreatmentPanel({
+  treatment,
+  healthy,
+}: {
+  treatment: DiseaseTreatment;
+  healthy: boolean;
+}) {
+  const { urgency, summary, medicines, actions, caution } = treatment;
+
+  return (
+    <div className="mt-7 rounded-2xl border border-leaf-200/60 bg-leaf-50 p-5 dark:border-leaf-700/30 dark:bg-leaf-900/30">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="font-display text-lg">What to do</h3>
+        <Badge tone={healthy ? "success" : "warning"}>{urgency}</Badge>
+      </div>
+      <p className="mt-2 text-sm text-[var(--fg)]">{summary}</p>
+
+      {medicines.length > 0 && (
+        <div className="mt-5">
+          <div className="flex items-center gap-2">
+            <Pill className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
+            <h4 className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+              Medicine — use one
+            </h4>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {medicines.map((m) => (
+              <li
+                key={m.name}
+                className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-3"
+              >
+                <p className="text-sm font-medium text-[var(--fg)]">{m.name}</p>
+                <p className="mt-0.5 text-xs text-[var(--fg-muted)]">
+                  {m.dose} · {m.interval}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {actions.length > 0 && (
+        <ul className="mt-5 space-y-2">
+          {actions.map((a) => (
+            <li key={a} className="flex items-start gap-2.5 text-sm">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-leaf-700 dark:text-leaf-300" />
+              <span className="text-[var(--fg)]">{a}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {caution && (
+        <p className="mt-5 border-t border-leaf-200/60 pt-3 text-xs text-[var(--fg-muted)] dark:border-leaf-700/30">
+          {caution}
+        </p>
+      )}
+    </div>
   );
 }

@@ -24,7 +24,7 @@ a short note under that diagram.
 
 ## PROJECT FACT SHEET
 
-**Project name:** Folium — Tobacco Leaf Disease Detection and Quality Grading System
+**Project name:** TobaccoScan — Tobacco Leaf Disease Detection and Quality Grading System
 **Type:** Full-stack web application with an embedded deep-learning inference pipeline
 **Users:** Tobacco farmers, extension/agronomy officers, grading-station staff, system administrator
 **Context:** Tanzanian flue-cured tobacco production; grading currently done by eye, which is slow, subjective and inconsistent between graders. Disease is often identified too late.

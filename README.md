@@ -1,4 +1,4 @@
-# 🌿 Folium — Tobacco Leaf Disease Detection & Quality Grading
+# TobaccoScan — Tobacco Leaf Disease Detection & Quality Grading
 
 A full-stack, production-grade system that uses deep learning to detect leaf diseases and classify quality grades for tobacco leaves from a single image.
 

@@ -5,7 +5,7 @@ import os
 
 
 class Settings(BaseSettings):
-    APP_NAME: str = "Tobacco Leaf API"
+    APP_NAME: str = "TobaccoScan API"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
 

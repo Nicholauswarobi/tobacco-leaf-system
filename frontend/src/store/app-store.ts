@@ -34,7 +34,7 @@ export const useAppStore = create<AppState>()(
       reset: () => set({ latest: null, isPredicting: false, error: null }),
     }),
     {
-      name: "folium-app-store",
+      name: "tobaccoscan-app-store",
       partialize: (state) => ({ latest: state.latest }),
     }
   )

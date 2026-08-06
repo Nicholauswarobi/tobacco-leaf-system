@@ -18,6 +18,8 @@ from app.services.model_service import (
 from app.schemas.prediction import (
     PredictionResponse,
     DiseaseResult,
+    DiseaseTreatment,
+    TreatmentMedicine,
     QualityResult,
     ClassProbability,
     VerificationResult,
@@ -175,7 +177,18 @@ def _to_verification_result(outcome: VerificationOutcome) -> VerificationResult:
         ],
     )
 
+# Standard label warning attached to every treatment that names a chemical.
+# Kept in one place so it cannot drift between diseases.
+_SPRAY_CAUTION = (
+    "Follow the product label rate. Wear gloves and a mask. Stop spraying "
+    "14 days before harvest."
+)
+
 # Knowledge base for disease descriptions + farmer-facing recommendations.
+#
+# `treatment` is the short, actionable half: what to spray, at what rate, how
+# often, and the two or three field actions that matter. Anything longer than
+# a phone screen belongs with an extension officer, not here.
 DISEASE_INFO = {
     "Alternaria Leaf Spot": {
         "description": (
@@ -189,6 +202,33 @@ DISEASE_INFO = {
             "Avoid overhead irrigation; water at the base.",
             "Improve airflow by widening plant spacing.",
         ],
+        "treatment": {
+            "urgency": "Treat now",
+            "summary": "Spray a protectant fungicide and strip infected leaves.",
+            "medicines": [
+                {
+                    "name": "Mancozeb 80% WP",
+                    "dose": "2.5 g per litre of water",
+                    "interval": "Every 7 days, up to 3 sprays",
+                },
+                {
+                    "name": "Azoxystrobin 250 SC",
+                    "dose": "1 ml per litre of water",
+                    "interval": "Every 10 days, up to 2 sprays",
+                },
+                {
+                    "name": "Copper oxychloride 50% WP",
+                    "dose": "3 g per litre of water",
+                    "interval": "Every 10 days (low-cost option)",
+                },
+            ],
+            "actions": [
+                "Remove and burn infected leaves.",
+                "Water at the base, never overhead.",
+                "Widen spacing to improve airflow.",
+            ],
+            "caution": _SPRAY_CAUTION,
+        },
     },
     "Cercospora Leaf Spot": {
         "description": (
@@ -202,6 +242,33 @@ DISEASE_INFO = {
             "Remove crop debris after harvest.",
             "Use resistant cultivars next season if available.",
         ],
+        "treatment": {
+            "urgency": "Treat now",
+            "summary": "Spray on a 7-day cycle and clear infected lower leaves.",
+            "medicines": [
+                {
+                    "name": "Chlorothalonil 75% WP",
+                    "dose": "2 g per litre of water",
+                    "interval": "Every 7 days, up to 3 sprays",
+                },
+                {
+                    "name": "Copper oxychloride 50% WP",
+                    "dose": "3 g per litre of water",
+                    "interval": "Every 10 days",
+                },
+                {
+                    "name": "Difenoconazole 250 EC",
+                    "dose": "0.5 ml per litre of water",
+                    "interval": "Every 14 days, up to 2 sprays",
+                },
+            ],
+            "actions": [
+                "Strip the worst-spotted lower leaves first.",
+                "Clear all crop debris after harvest.",
+                "Rotate the field next season.",
+            ],
+            "caution": _SPRAY_CAUTION,
+        },
     },
     "Healthy": {
         "description": (
@@ -213,12 +280,33 @@ DISEASE_INFO = {
             "Continue routine pest scouting every 7–10 days.",
             "Monitor humidity to prevent fungal onset.",
         ],
+        "treatment": {
+            "urgency": "No treatment needed",
+            "summary": "No disease detected. Do not spray; keep scouting.",
+            "medicines": [],
+            "actions": [
+                "Scout the field every 7 days.",
+                "Keep irrigation and fertiliser unchanged.",
+                "Watch humidity in dense rows.",
+            ],
+            "caution": None,
+        },
     },
 }
 
 _DISEASE_INFO_FALLBACK = {
     "description": "No description available for this disease class.",
     "recommendations": ["Consult a local agricultural extension officer for guidance."],
+    "treatment": {
+        "urgency": "Confirm first",
+        "summary": "Class not in the treatment guide. Confirm before spraying.",
+        "medicines": [],
+        "actions": [
+            "Photograph the affected leaves.",
+            "Contact your local extension officer.",
+        ],
+        "caution": None,
+    },
 }
 
 QUALITY_INFO = {
@@ -252,6 +340,20 @@ QUALITY_INFO = {
 def _lookup_disease(label: str) -> dict:
     """Safe lookup — never raises KeyError for unknown labels."""
     return DISEASE_INFO.get(label, _DISEASE_INFO_FALLBACK)
+
+
+def _to_treatment(info: dict) -> DiseaseTreatment | None:
+    """Build the treatment block, tolerating entries that have none."""
+    data = info.get("treatment")
+    if not data:
+        return None
+    return DiseaseTreatment(
+        urgency=data["urgency"],
+        summary=data["summary"],
+        medicines=[TreatmentMedicine(**m) for m in data.get("medicines", [])],
+        actions=list(data.get("actions", [])),
+        caution=data.get("caution"),
+    )
 
 
 def _lookup_quality(label: str) -> dict:
@@ -309,6 +411,7 @@ def predict_disease_only(
             confidence=top_confidence,
             description=d_info["description"],
             recommendations=d_info["recommendations"],
+            treatment=_to_treatment(d_info),
             all_probabilities=_to_class_probs(DISEASE_CLASSES, disease_probs),
         ),
         quality=QualityResult(
@@ -424,6 +527,7 @@ def predict_full(
             confidence=float(disease_probs[disease_idx]),
             description=d_info["description"],
             recommendations=d_info["recommendations"],
+            treatment=_to_treatment(d_info),
             all_probabilities=_to_class_probs(DISEASE_CLASSES, disease_probs),
         ),
         quality=QualityResult(

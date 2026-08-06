@@ -27,8 +27,8 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Folium — Tobacco Leaf Disease & Quality Grading",
-    template: "%s · Folium",
+    default: "TobaccoScan — Tobacco Leaf Disease & Quality Grading",
+    template: "%s · TobaccoScan",
   },
   description:
     "AI-driven detection of tobacco leaf diseases and intelligent quality grading for modern agriculture.",
@@ -40,10 +40,10 @@ export const metadata: Metadata = {
     "computer vision",
     "CNN",
   ],
-  authors: [{ name: "Folium Agritech" }],
+  authors: [{ name: "TobaccoScan" }],
   manifest: "/manifest.webmanifest",
   openGraph: {
-    title: "Folium — Tobacco Leaf Diagnostics",
+    title: "TobaccoScan — Tobacco Leaf Diagnostics",
     description: "Detection of tobacco leaf diseases and quality grading powered by deep learning.",
     type: "website",
   },

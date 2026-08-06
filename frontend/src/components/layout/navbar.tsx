@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 
 import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "./theme-toggle";
+import { useAppStore } from "@/store/app-store";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -22,6 +23,14 @@ export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // The result page has no nav entry of its own — it belongs to whichever
+  // section produced the analysis, so the tab the user came from stays lit.
+  const latestMode = useAppStore((s) => s.latest?.mode);
+  // The persisted store rehydrates only on the client; deferring to it until
+  // after mount keeps the first client render identical to the server HTML.
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -32,6 +41,8 @@ export function Navbar() {
 
   // Close mobile menu on navigation
   useEffect(() => setOpen(false), [pathname]);
+
+  const activeHref = resolveActiveHref(pathname, mounted ? latestMode : undefined);
 
   return (
     <header
@@ -49,24 +60,22 @@ export function Navbar() {
 
         <nav className="hidden md:flex items-center gap-1">
           {NAV.map((item) => {
-            const active =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname?.startsWith(item.href);
+            const active = item.href === activeHref;
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative px-4 py-2 text-sm font-medium tracking-wide transition-colors",
+                  "relative rounded-full px-4 py-2 text-sm tracking-wide transition-colors",
                   active
-                    ? "text-leaf-800 dark:text-leaf-200"
-                    : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+                    ? "bg-leaf-100 font-semibold text-leaf-900 dark:bg-leaf-800/60 dark:text-leaf-50"
+                    : "font-medium text-[var(--fg-muted)] hover:bg-leaf-50 hover:text-[var(--fg)] dark:hover:bg-leaf-800/25"
                 )}
               >
                 {item.label}
                 {active && (
-                  <span className="absolute -bottom-px left-1/2 h-px w-6 -translate-x-1/2 bg-leaf-700 dark:bg-leaf-300" />
+                  <span className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-leaf-700 dark:bg-leaf-300" />
                 )}
               </Link>
             );
@@ -99,22 +108,54 @@ export function Navbar() {
         )}
       >
         <div className="flex flex-col px-5 py-4 gap-1">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "rounded-xl px-4 py-3 text-sm font-medium",
-                pathname === item.href
-                  ? "bg-leaf-100 text-leaf-900 dark:bg-leaf-800/40 dark:text-leaf-100"
-                  : "text-[var(--fg-muted)] hover:bg-leaf-50 dark:hover:bg-leaf-800/20"
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV.map((item) => {
+            const active = item.href === activeHref;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex items-center justify-between rounded-xl px-4 py-3 text-sm",
+                  active
+                    ? "bg-leaf-100 font-semibold text-leaf-900 dark:bg-leaf-800/60 dark:text-leaf-50"
+                    : "font-medium text-[var(--fg-muted)] hover:bg-leaf-50 dark:hover:bg-leaf-800/20"
+                )}
+              >
+                {item.label}
+                {active && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-leaf-700 dark:bg-leaf-300" />
+                )}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </header>
   );
+}
+
+/**
+ * Which nav entry should read as active for the current URL.
+ *
+ * Pages without their own tab (`/result`, `/upload`) map back to the section
+ * they belong to, so the highlight never disappears mid-flow.
+ */
+function resolveActiveHref(
+  pathname: string | null,
+  latestMode?: "disease" | "quality" | "full"
+): string | null {
+  if (!pathname) return null;
+  if (pathname === "/") return "/";
+
+  if (pathname.startsWith("/result")) {
+    if (!latestMode) return null;
+    return latestMode === "quality" ? "/quality" : "/disease";
+  }
+  if (pathname.startsWith("/upload")) return "/disease";
+
+  const match = NAV.find(
+    (item) => item.href !== "/" && pathname.startsWith(item.href)
+  );
+  return match?.href ?? null;
 }

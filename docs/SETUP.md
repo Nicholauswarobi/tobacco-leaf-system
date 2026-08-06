@@ -1,6 +1,6 @@
 # Setup Guide
 
-Detailed walkthrough for getting the Folium tobacco leaf system running locally and in production.
+Detailed walkthrough for getting the TobaccoScan tobacco leaf system running locally and in production.
 
 ## Prerequisites
 

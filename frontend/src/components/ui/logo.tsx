@@ -30,7 +30,7 @@ export function Logo({ className }: { className?: string }) {
           opacity="0.7"
         />
       </svg>
-      <span className="font-display text-xl tracking-tight">Folium</span>
+      <span className="font-display text-xl tracking-tight">TobaccoScan</span>
     </span>
   );
 }

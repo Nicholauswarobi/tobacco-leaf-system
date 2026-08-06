@@ -1,6 +1,6 @@
 {
-  "name": "Folium — Tobacco Leaf Diagnostics",
-  "short_name": "Folium",
+  "name": "TobaccoScan — Tobacco Leaf Diagnostics",
+  "short_name": "TobaccoScan",
   "description": "AI-powered tobacco leaf disease detection and quality grading",
   "start_url": "/",
   "display": "standalone",

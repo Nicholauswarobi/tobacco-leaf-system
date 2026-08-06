@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "How Folium detects tobacco leaf diseases and grades quality using deep learning.",
+  description: "How TobaccoScan detects tobacco leaf diseases and grades quality using deep learning.",
 };
 
 const PIPELINE = [
@@ -55,7 +55,7 @@ export default function AboutPage() {
         </span>
       </h1>
       <p className="mt-6 text-lg text-[var(--fg-muted)] leading-relaxed max-w-3xl">
-        Folium is a complete diagnostic system that pairs computer vision
+        TobaccoScan is a complete diagnostic system that pairs computer vision
         with the operational realities of tobacco farming. It runs on
         commodity hardware, returns answers in under a second, and is
         designed to be useful in the barn, not just the lab.

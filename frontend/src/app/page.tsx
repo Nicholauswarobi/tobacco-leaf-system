@@ -69,7 +69,7 @@ export default function Home() {
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-[var(--fg-muted)] leading-relaxed">
-              Folium combines deep learning with decades of curing wisdom to
+              TobaccoScan combines deep learning with decades of curing wisdom to
               detect disease and grade tobacco leaves in seconds — straight
               from your phone, in any field.
             </p>

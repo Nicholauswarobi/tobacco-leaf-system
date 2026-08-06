@@ -30,11 +30,29 @@ export interface VerificationResponse {
   processing_time_ms: number;
 }
 
+/** One product to spray, with rate and interval. */
+export interface TreatmentMedicine {
+  name: string;
+  dose: string;
+  interval: string;
+}
+
+/** Short, field-ready answer to "what do I do now?". */
+export interface DiseaseTreatment {
+  urgency: string;
+  summary: string;
+  medicines: TreatmentMedicine[];
+  actions: string[];
+  caution?: string | null;
+}
+
 export interface DiseaseResult {
   label: string;
   confidence: number;
   description: string;
   recommendations: string[];
+  /** Absent on results saved before treatments existed. */
+  treatment?: DiseaseTreatment | null;
   all_probabilities: ClassProbability[];
 }
 

@@ -39,7 +39,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-[var(--border)] pt-6 text-xs text-[var(--fg-muted)]">
-          <p>© {new Date().getFullYear()} Folium Agritech. Built for the field.</p>
+          <p>© {new Date().getFullYear()} TobaccoScan. Built for the field.</p>
           <p className="font-mono">v1.0.0 · CNN · Keras / TensorFlow</p>
         </div>
       </div>

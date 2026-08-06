@@ -35,11 +35,35 @@ class VerificationResponse(BaseModel):
     processing_time_ms: float
 
 
+class TreatmentMedicine(BaseModel):
+    """One product a grower can buy, with the rate and spray interval."""
+
+    name: str
+    dose: str
+    interval: str
+
+
+class DiseaseTreatment(BaseModel):
+    """Short, field-ready answer to "what do I do now?".
+
+    Deliberately terse: growers read this on a phone in the field, so each
+    field is one line. Longer agronomy belongs with the extension officer.
+    """
+
+    urgency: str
+    summary: str
+    medicines: List[TreatmentMedicine] = []
+    actions: List[str] = []
+    caution: Optional[str] = None
+
+
 class DiseaseResult(BaseModel):
     label: str
     confidence: float
     description: str
     recommendations: List[str]
+    # Optional so history rows written before treatments existed still load.
+    treatment: Optional[DiseaseTreatment] = None
     all_probabilities: List[ClassProbability]
 
 
