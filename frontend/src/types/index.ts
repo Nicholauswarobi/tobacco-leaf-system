@@ -30,6 +30,9 @@ export interface VerificationResponse {
   processing_time_ms: number;
 }
 
+/** Languages the interface is available in. */
+export type Lang = "en" | "sw";
+
 /** One product to spray, with rate and interval. */
 export interface TreatmentMedicine {
   name: string;

@@ -7,20 +7,23 @@ import { Menu, X } from "lucide-react";
 
 import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "./theme-toggle";
+import { LanguageToggle } from "./language-toggle";
 import { useAppStore } from "@/store/app-store";
+import { useI18n, type TKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/disease", label: "Disease Check" },
-  { href: "/quality", label: "Quality Grade" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/history", label: "History" },
-  { href: "/about", label: "About" },
+const NAV: { href: string; label: TKey }[] = [
+  { href: "/", label: "nav.home" },
+  { href: "/disease", label: "nav.disease" },
+  { href: "/quality", label: "nav.quality" },
+  { href: "/dashboard", label: "nav.dashboard" },
+  { href: "/history", label: "nav.history" },
+  { href: "/about", label: "nav.about" },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   // The result page has no nav entry of its own — it belongs to whichever
@@ -73,7 +76,7 @@ export function Navbar() {
                     : "font-medium text-[var(--fg-muted)] hover:bg-leaf-50 hover:text-[var(--fg)] dark:hover:bg-leaf-800/25"
                 )}
               >
-                {item.label}
+                {t(item.label)}
                 {active && (
                   <span className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-leaf-700 dark:bg-leaf-300" />
                 )}
@@ -85,10 +88,11 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <Link
             href="/disease"
-            className="hidden md:inline-flex h-9 items-center rounded-full bg-leaf-700 px-4 text-sm font-medium text-parchment hover:bg-leaf-800 transition-colors dark:bg-leaf-300 dark:text-leaf-900 dark:hover:bg-leaf-200"
+            className="hidden lg:inline-flex h-9 items-center rounded-full bg-leaf-700 px-4 text-sm font-medium text-parchment hover:bg-leaf-800 transition-colors dark:bg-leaf-300 dark:text-leaf-900 dark:hover:bg-leaf-200"
           >
-            Start analysis
+            {t("nav.start")}
           </Link>
+          <LanguageToggle className="hidden sm:inline-flex" />
           <ThemeToggle />
           <button
             className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-elev)]"
@@ -122,13 +126,19 @@ export function Navbar() {
                     : "font-medium text-[var(--fg-muted)] hover:bg-leaf-50 dark:hover:bg-leaf-800/20"
                 )}
               >
-                {item.label}
+                {t(item.label)}
                 {active && (
                   <span className="h-1.5 w-1.5 rounded-full bg-leaf-700 dark:bg-leaf-300" />
                 )}
               </Link>
             );
           })}
+          <div className="mt-2 flex items-center justify-between border-t border-[var(--border)] pt-3 sm:hidden">
+            <span className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+              {t("nav.language")}
+            </span>
+            <LanguageToggle />
+          </div>
         </div>
       </div>
     </header>

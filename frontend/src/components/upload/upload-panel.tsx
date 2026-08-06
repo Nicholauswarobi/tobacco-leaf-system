@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { api, NotATobaccoLeafError, WrongSectionError } from "@/lib/api";
 import { useAppStore } from "@/store/app-store";
+import { useI18n, type TKey } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { VerificationResult } from "@/types";
 
@@ -32,6 +33,7 @@ interface UploadPanelProps {
 
 export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const setLatest = useAppStore((s) => s.setLatest);
   const setPredicting = useAppStore((s) => s.setPredicting);
   const setError = useAppStore((s) => s.setError);
@@ -53,7 +55,9 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   const acceptFile = useCallback(
     (f: File) => {
       if (f.size > MAX_BYTES) {
-        setError(`File too large (${(f.size / 1024 / 1024).toFixed(1)} MB). Max 10 MB.`);
+        setError(
+          t("upload.tooLarge", { size: (f.size / 1024 / 1024).toFixed(1) })
+        );
         return;
       }
       setError(null);
@@ -63,7 +67,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(URL.createObjectURL(f));
     },
-    [previewUrl, setError]
+    [previewUrl, setError, t]
   );
 
   const onDrop = useCallback(
@@ -129,27 +133,28 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
           }
         );
       } else {
-        setError(e instanceof Error ? e.message : "Prediction failed");
+        // Whatever the API said, the reader can only act on plain language.
+        setError(t("upload.failed"));
       }
     } finally {
       setPredicting(false);
     }
   };
 
-  const analysisType = mode === "quality" ? "quality grading" : "disease detection";
-  const checklist = mode === "quality"
-    ? [
-        "Quality grade (A/B/C) with market value",
-        "Confidence score for the grade",
-        "Curing and uniformity assessment",
-        "Saved to history for export later",
-      ]
-    : [
-        "Disease class with probabilities",
-        "Recommended actions for diagnosis",
-        "Confidence scores for each disease",
-        "Saved to history for export later",
-      ];
+  const checklist: TKey[] =
+    mode === "quality"
+      ? [
+          "upload.getQuality1",
+          "upload.getQuality2",
+          "upload.getQuality3",
+          "upload.getQuality4",
+        ]
+      : [
+          "upload.getDisease1",
+          "upload.getDisease2",
+          "upload.getDisease3",
+          "upload.getDisease4",
+        ];
 
   return (
     <div className="grid gap-8 lg:grid-cols-5">
@@ -181,13 +186,13 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                   reset();
                 }}
                 className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
-                aria-label="Remove image"
+                aria-label={t("upload.remove")}
               >
                 <X className="h-4 w-4" />
               </button>
               <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-leaf-700 px-3 py-1.5 text-xs text-parchment">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Ready to analyze
+                {t("upload.ready")}
               </div>
             </div>
           ) : (
@@ -196,17 +201,16 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                 <ImagePlus className="h-6 w-6" />
               </div>
               <h3 className="mt-5 font-display text-2xl tracking-tight">
-                Drop a leaf photo here
+                {t("upload.dropTitle")}
               </h3>
               <p className="mt-2 text-sm text-[var(--fg-muted)]">
-                JPG, PNG, or WebP up to 10 MB. For best results use natural
-                light, fill the frame, and capture the upper leaf surface.
+                {t("upload.dropBody")}
               </p>
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                 <Button onClick={open} variant="primary">
                   <ImagePlus className="h-4 w-4" />
-                  Choose file
+                  {t("upload.choose")}
                 </Button>
                 <Button
                   onClick={(e) => {
@@ -216,7 +220,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                   variant="outline"
                 >
                   <Camera className="h-4 w-4" />
-                  Use camera
+                  {t("upload.camera")}
                 </Button>
                 <input
                   ref={cameraInputRef}
@@ -239,9 +243,11 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
             <div className="flex items-start gap-3">
               <Leaf className="mt-0.5 h-5 w-5 shrink-0" />
               <div className="min-w-0">
-                <p className="font-semibold">This is a tobacco leaf.</p>
+                <p className="font-semibold">{t("upload.wrongSectionTitle")}</p>
                 <p className="mt-1.5 text-sky-800/90 dark:text-sky-200/80">
-                  {misrouted.message}
+                  {misrouted.suggestedMode === "quality"
+                    ? t("quality.lead")
+                    : t("disease.lead")}
                 </p>
                 <Button
                   variant="outline"
@@ -254,10 +260,12 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                     )
                   }
                 >
-                  Go to{" "}
-                  {misrouted.suggestedMode === "quality"
-                    ? "Quality Grading"
-                    : "Disease Detection"}
+                  {t("upload.goTo", {
+                    section:
+                      misrouted.suggestedMode === "quality"
+                        ? t("nav.quality")
+                        : t("nav.disease"),
+                  })}
                 </Button>
               </div>
             </div>
@@ -279,15 +287,14 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                   </p>
                 )}
                 <p className="mt-2 text-amber-800/90 dark:text-amber-200/80">
-                  Tip: fill the frame with a single leaf, use natural light, and
-                  photograph the upper surface against a plain background.
+                  {t("upload.notLeafTip")}
                 </p>
                 <Button
                   onClick={reset}
                   variant="outline"
                   className="mt-3"
                 >
-                  Try another image
+                  {t("upload.tryAnother")}
                 </Button>
               </div>
             </div>
@@ -304,22 +311,18 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
       {/* Right: actions */}
       <div className="lg:col-span-2">
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-7 sticky top-24">
-          <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
-            Step 02
-          </p>
-          <h2 className="mt-2 font-display text-3xl tracking-tight">
-            Run analysis
+          <h2 className="font-display text-3xl tracking-tight">
+            {t("upload.runTitle")}
           </h2>
           <p className="mt-3 text-sm text-[var(--fg-muted)] leading-relaxed">
-            Run {analysisType} on your image. The model will return results, 
-            confidence scores, and actionable insights.
+            {mode === "quality" ? t("upload.runQuality") : t("upload.runDisease")}
           </p>
 
           <ul className="mt-6 space-y-2.5 text-sm">
-            {checklist.map((s) => (
-              <li key={s} className="flex items-start gap-2.5">
+            {checklist.map((key) => (
+              <li key={key} className="flex items-start gap-2.5">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 text-leaf-700 dark:text-leaf-300 shrink-0" />
-                <span className="text-[var(--fg-muted)]">{s}</span>
+                <span className="text-[var(--fg-muted)]">{t(key)}</span>
               </li>
             ))}
           </ul>
@@ -334,18 +337,18 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
             {isPredicting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing leaf…
+                {t("upload.running")}
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
-                Run analysis
+                {t("upload.run")}
               </>
             )}
           </Button>
 
           <p className="mt-4 text-center text-xs text-[var(--fg-muted)]">
-            Average inference: ~1 second
+            {t("upload.speed")}
           </p>
         </div>
       </div>

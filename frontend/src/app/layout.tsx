@@ -3,6 +3,7 @@ import { Fraunces, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { LanguageProvider } from "@/lib/i18n";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 
@@ -31,14 +32,15 @@ export const metadata: Metadata = {
     template: "%s · TobaccoScan",
   },
   description:
-    "AI-driven detection of tobacco leaf diseases and intelligent quality grading for modern agriculture.",
+    "Photograph a tobacco leaf to find out whether it is sick, what to spray, and what grade it will fetch.",
   keywords: [
     "tobacco",
-    "leaf disease detection",
+    "tumbaku",
+    "leaf disease",
+    "ugonjwa wa majani",
     "quality grading",
-    "agriculture AI",
-    "computer vision",
-    "CNN",
+    "daraja la ubora",
+    "farming",
   ],
   authors: [{ name: "TobaccoScan" }],
   manifest: "/manifest.webmanifest",
@@ -72,11 +74,13 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased">
         <ThemeProvider>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <LanguageProvider>
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

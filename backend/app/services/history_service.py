@@ -51,16 +51,91 @@ class HistoryService:
                 )
                 """
             )
-            # Migrate existing databases that don't have the mode column yet
+            # Migrate existing databases that don't have the mode column yet.
+            # NOTE: this appends `mode` as the LAST column, so physical column
+            # order differs from the logical order used elsewhere. Every
+            # statement must therefore name its columns explicitly.
             try:
                 c.execute("ALTER TABLE predictions ADD COLUMN mode TEXT NOT NULL DEFAULT 'disease'")
             except Exception:
                 pass  # Column already exists — safe to ignore
 
+        self._repair_shifted_rows()
+
+    # Valid values of the `mode` column; also the fingerprint of a shifted row,
+    # since a corrupted row has one of these sitting in `disease_label`.
+    _MODES = ("disease", "quality", "full")
+
+    def _repair_shifted_rows(self) -> int:
+        """Undo the column shift left behind by the old positional INSERT.
+
+        Rows written before `save()` named its columns had every value stored
+        one position to the left of where it belonged, which made the whole
+        history endpoint fail to serialize. The original values are all still
+        present, just in the wrong columns, so they can be moved back:
+
+            disease_label      held the mode
+            disease_confidence held the disease label
+            quality_grade      held the disease confidence
+            quality_confidence held the quality grade
+            mode               held the quality confidence
+
+        A row is only rewritten when it carries that exact fingerprint — a
+        mode name in `disease_label` *and* a number in `mode`. A correctly
+        written row can never match both, so this is safe to run on every
+        startup and does nothing once the data is clean.
+
+        Returns the number of rows repaired.
+        """
+        repaired = 0
+        with self._conn() as c:
+            rows = c.execute("SELECT * FROM predictions").fetchall()
+            for row in rows:
+                if row["disease_label"] not in self._MODES:
+                    continue
+                try:
+                    disease_confidence = float(row["quality_grade"])
+                    quality_confidence = float(row["mode"])
+                except (TypeError, ValueError):
+                    continue  # not the shifted pattern — leave it alone
+
+                c.execute(
+                    """
+                    UPDATE predictions
+                       SET mode = ?,
+                           disease_label = ?,
+                           disease_confidence = ?,
+                           quality_grade = ?,
+                           quality_confidence = ?
+                     WHERE id = ?
+                    """,
+                    (
+                        row["disease_label"],
+                        row["disease_confidence"],
+                        disease_confidence,
+                        row["quality_confidence"],
+                        quality_confidence,
+                        row["id"],
+                    ),
+                )
+                repaired += 1
+        return repaired
+
     def save(self, p: PredictionResponse) -> None:
+        # Columns are named explicitly. A positional INSERT used to be used here
+        # and silently wrote every value into the wrong column, because `mode`
+        # is appended to the end of the table by the ALTER TABLE migration above
+        # rather than sitting where the tuple put it. Naming the columns makes
+        # the statement independent of physical column order.
         with self._conn() as c:
             c.execute(
-                """INSERT INTO predictions VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                """
+                INSERT INTO predictions (
+                    id, timestamp, image_url, mode,
+                    disease_label, disease_confidence,
+                    quality_grade, quality_confidence
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
                 (
                     p.id,
                     p.timestamp.isoformat(),

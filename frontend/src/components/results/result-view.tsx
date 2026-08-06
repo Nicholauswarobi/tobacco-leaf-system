@@ -25,6 +25,15 @@ import { Badge } from "@/components/ui/badge";
 import { ConfidenceBar } from "@/components/results/confidence-bar";
 import { api } from "@/lib/api";
 import { formatPercent, formatDate } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+import {
+  diseaseName,
+  diseaseDescription,
+  gradeName,
+  gradeDescription,
+  marketValue,
+  localizeTreatment,
+} from "@/lib/leaf-content";
 import type { DiseaseTreatment } from "@/types";
 
 const isHealthy = (label: string) => label.toLowerCase() === "healthy";
@@ -36,16 +45,17 @@ const gradeTone = (g: string) => {
 
 export function ResultView() {
   const router = useRouter();
+  const { t, lang } = useI18n();
   const latest = useAppStore((s) => s.latest);
 
   useEffect(() => {
-    if (!latest) router.replace("/upload");
+    if (!latest) router.replace("/disease");
   }, [latest, router]);
 
   if (!latest) {
     return (
       <div className="mx-auto max-w-2xl py-32 text-center">
-        <p className="text-[var(--fg-muted)]">No prediction loaded. Redirecting…</p>
+        <p className="text-[var(--fg-muted)]">{t("common.loading")}</p>
       </div>
     );
   }
@@ -58,13 +68,16 @@ export function ResultView() {
 
   // Send the user back to the section this analysis came from, so uploading
   // again lands in the right model instead of the generic upload page.
-  const sameSectionHref =
-    mode === "quality" ? "/quality" : mode === "disease" ? "/disease" : "/upload";
+  const sameSectionHref = mode === "quality" ? "/quality" : "/disease";
   const sameSectionLabel =
-    mode === "quality" ? "Quality Grading" : mode === "disease" ? "Disease Detection" : "Full analysis";
+    mode === "quality" ? t("nav.quality") : t("nav.disease");
   const otherSectionHref = mode === "quality" ? "/disease" : "/quality";
   const otherSectionLabel =
-    mode === "quality" ? "Disease Detection" : "Quality Grading";
+    mode === "quality" ? t("nav.disease") : t("nav.quality");
+
+  // Backend content arrives in English; swap it for Swahili when asked.
+  const diseaseLabel = diseaseName(disease.label, lang);
+  const gradeLabel = gradeName(quality.grade, lang);
 
   /** Straight back to the same analysis page, ready for the next photo. */
   const analyzeAnother = () => router.push(sameSectionHref);
@@ -84,10 +97,10 @@ export function ResultView() {
   const share = async () => {
     const text =
       mode === "quality"
-        ? `Tobacco leaf quality: ${quality.grade} (${formatPercent(quality.confidence)})`
+        ? `${gradeLabel} (${formatPercent(quality.confidence)})`
         : mode === "disease"
-        ? `Tobacco leaf diagnosis: ${disease.label} (${formatPercent(disease.confidence)})`
-        : `Tobacco leaf — ${disease.label} (${formatPercent(disease.confidence)}) · ${quality.grade} (${formatPercent(quality.confidence)})`;
+        ? `${diseaseLabel} (${formatPercent(disease.confidence)})`
+        : `${diseaseLabel} (${formatPercent(disease.confidence)}) · ${gradeLabel} (${formatPercent(quality.confidence)})`;
 
     if (navigator.share) {
       try {
@@ -104,19 +117,18 @@ export function ResultView() {
   const heading =
     mode === "quality" ? (
       <>
-        Quality grade:{" "}
+        {t("result.gradeIs")}{" "}
         <em className={`${gradeTone(quality.grade) === "success" ? "text-leaf-700 dark:text-leaf-300" : gradeTone(quality.grade) === "warning" ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400"}`}>
-          {quality.grade}
+          {gradeLabel}
         </em>
         .
       </>
     ) : healthy ? (
-      <>
-        The leaf reads <em className="text-leaf-700 dark:text-leaf-300">healthy</em>.
-      </>
+      <>{t("result.healthy")}</>
     ) : (
       <>
-        We detected <em className="text-tobacco-700 dark:text-tobacco-300">{disease.label}</em>.
+        {t("result.detected")}{" "}
+        <em className="text-tobacco-700 dark:text-tobacco-300">{diseaseLabel}</em>.
       </>
     );
 
@@ -129,20 +141,20 @@ export function ResultView() {
           className="inline-flex items-center gap-2 text-sm text-[var(--fg-muted)] hover:text-[var(--fg)]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to {sameSectionLabel}
+          {t("result.backTo", { section: sameSectionLabel })}
         </Link>
         <div className="flex flex-wrap gap-2">
           <Button variant="primary" size="sm" onClick={analyzeAnother}>
             <ImagePlus className="h-4 w-4" />
-            Upload another leaf
+            {t("result.uploadAnother")}
           </Button>
           <Button variant="outline" size="sm" onClick={share}>
             <Share2 className="h-4 w-4" />
-            Share
+            {t("result.share")}
           </Button>
           <Button variant="outline" size="sm" onClick={exportJson}>
             <Download className="h-4 w-4" />
-            Export JSON
+            {t("result.export")}
           </Button>
         </div>
       </div>
@@ -154,7 +166,11 @@ export function ResultView() {
         className="mb-10"
       >
         <p className="text-xs uppercase tracking-[0.18em] text-leaf-700 dark:text-leaf-300">
-          {mode === "quality" ? "Quality grading complete" : mode === "disease" ? "Disease detection complete" : "Diagnosis complete"}
+          {mode === "quality"
+            ? t("result.doneQuality")
+            : mode === "disease"
+            ? t("result.doneDisease")
+            : t("result.doneFull")}
         </p>
         <h1 className="mt-3 font-display text-4xl sm:text-5xl tracking-tight">
           {heading}
@@ -213,13 +229,13 @@ export function ResultView() {
                 {showDisease && (
                   <Badge tone={healthy ? "success" : "tobacco"}>
                     {healthy ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
-                    {disease.label}
+                    {diseaseLabel}
                   </Badge>
                 )}
                 {showQuality && (
                   <Badge tone={gradeTone(quality.grade)}>
                     <Award className="h-3 w-3" />
-                    {quality.grade}
+                    {gradeLabel}
                   </Badge>
                 )}
               </div>
@@ -241,15 +257,15 @@ export function ResultView() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
-                    Disease detection
+                    {t("result.diseaseSection")}
                   </p>
                   <h2 className="mt-2 font-display text-3xl tracking-tight">
-                    {disease.label}
+                    {diseaseLabel}
                   </h2>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
-                    Confidence
+                    {t("common.confidence")}
                   </p>
                   <p className="mt-1 font-display text-3xl text-leaf-700 dark:text-leaf-300">
                     {formatPercent(disease.confidence, 0)}
@@ -258,14 +274,14 @@ export function ResultView() {
               </div>
 
               <p className="mt-5 text-[var(--fg-muted)] leading-relaxed">
-                {disease.description}
+                {diseaseDescription(disease.label, disease.description, lang)}
               </p>
 
               <div className="mt-6 grid gap-3">
                 {disease.all_probabilities.map((p, i) => (
                   <ConfidenceBar
                     key={p.label}
-                    label={p.label}
+                    label={diseaseName(p.label, lang)}
                     value={p.probability}
                     highlighted={p.label === disease.label}
                     index={i}
@@ -276,13 +292,18 @@ export function ResultView() {
               {/* What to do now. Falls back to the plain recommendation list
                   for results saved before treatments were returned. */}
               {disease.treatment ? (
-                <TreatmentPanel treatment={disease.treatment} healthy={healthy} />
+                <TreatmentPanel
+                  treatment={localizeTreatment(disease.label, disease.treatment, lang)}
+                  healthy={healthy}
+                />
               ) : (
                 disease.recommendations.length > 0 && (
                   <div className="mt-7 rounded-2xl bg-leaf-50 dark:bg-leaf-900/30 border border-leaf-200/60 dark:border-leaf-700/30 p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
-                      <h3 className="font-display text-lg">Recommendations</h3>
+                      <h3 className="font-display text-lg">
+                        {t("result.recommendations")}
+                      </h3>
                     </div>
                     <ul className="space-y-2.5">
                       {disease.recommendations.map((r) => (
@@ -309,16 +330,18 @@ export function ResultView() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
-                    Quality grade
+                    {t("result.qualitySection")}
                   </p>
                   <h2 className="mt-2 font-display text-3xl tracking-tight flex items-center gap-3">
-                    {quality.grade}
-                    <Badge tone={gradeTone(quality.grade)}>{quality.market_value}</Badge>
+                    {gradeLabel}
+                    <Badge tone={gradeTone(quality.grade)}>
+                      {marketValue(quality.grade, quality.market_value, lang)}
+                    </Badge>
                   </h2>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
-                    Confidence
+                    {t("common.confidence")}
                   </p>
                   <p className="mt-1 font-display text-3xl text-tobacco-700 dark:text-tobacco-300">
                     {formatPercent(quality.confidence, 0)}
@@ -327,14 +350,14 @@ export function ResultView() {
               </div>
 
               <p className="mt-5 text-[var(--fg-muted)] leading-relaxed">
-                {quality.description}
+                {gradeDescription(quality.grade, quality.description, lang)}
               </p>
 
               <div className="mt-6 grid gap-3">
                 {quality.all_probabilities.map((p, i) => (
                   <ConfidenceBar
                     key={p.label}
-                    label={p.label}
+                    label={gradeName(p.label, lang)}
                     value={p.probability}
                     highlighted={p.label === quality.grade}
                     index={i}
@@ -353,14 +376,7 @@ export function ResultView() {
               className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] px-5 py-4 text-sm text-[var(--fg-muted)]"
             >
               <Info className="h-4 w-4 shrink-0 mt-0.5 text-leaf-700 dark:text-leaf-300" />
-              <p>
-                <strong className="text-[var(--fg)]">Quality grading not available.</strong>{" "}
-                No quality model has been trained yet. Use the{" "}
-                <Link href="/quality" className="text-leaf-700 dark:text-leaf-300 underline underline-offset-2">
-                  Quality Check
-                </Link>{" "}
-                page once a quality model is ready.
-              </p>
+              <p>{t("result.noQualityModel")}</p>
             </motion.div>
           )}
         </div>
@@ -375,25 +391,20 @@ export function ResultView() {
       >
         <div>
           <h3 className="font-display text-2xl tracking-tight">
-            Analyze another leaf
+            {t("result.againTitle")}
           </h3>
           <p className="mt-1.5 text-sm text-[var(--fg-muted)]">
-            Upload the next photo in {sameSectionLabel}, or switch section.
+            {t("result.againBody", { section: sameSectionLabel })}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button onClick={analyzeAnother}>
             <ImagePlus className="h-4 w-4" />
-            Upload in {sameSectionLabel}
+            {t("result.againButton", { section: sameSectionLabel })}
           </Button>
-          {mode !== "full" && (
-            <Button
-              variant="outline"
-              onClick={() => router.push(otherSectionHref)}
-            >
-              Go to {otherSectionLabel}
-            </Button>
-          )}
+          <Button variant="outline" onClick={() => router.push(otherSectionHref)}>
+            {t("result.goOther", { section: otherSectionLabel })}
+          </Button>
         </div>
       </motion.div>
     </section>
@@ -412,12 +423,13 @@ function TreatmentPanel({
   treatment: DiseaseTreatment;
   healthy: boolean;
 }) {
+  const { t } = useI18n();
   const { urgency, summary, medicines, actions, caution } = treatment;
 
   return (
     <div className="mt-7 rounded-2xl border border-leaf-200/60 bg-leaf-50 p-5 dark:border-leaf-700/30 dark:bg-leaf-900/30">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-display text-lg">What to do</h3>
+        <h3 className="font-display text-lg">{t("tx.title")}</h3>
         <Badge tone={healthy ? "success" : "warning"}>{urgency}</Badge>
       </div>
       <p className="mt-2 text-sm text-[var(--fg)]">{summary}</p>
@@ -427,7 +439,7 @@ function TreatmentPanel({
           <div className="flex items-center gap-2">
             <Pill className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
             <h4 className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
-              Medicine — use one
+              {t("tx.medicine")}
             </h4>
           </div>
           <ul className="mt-3 space-y-2">
