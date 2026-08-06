@@ -5,3 +5,18 @@
 node_modules
 .env*
 !.env*.example
+
+# Images are never committed to this repo. Training datasets, uploaded leaf
+# photos and generated report figures are large and belong outside version
+# control. If a genuine app asset ever needs tracking (a PWA icon, say), add
+# it deliberately with: git add -f <path>
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.webp
+*.tif
+*.tiff
+*.ico
+*.svg
