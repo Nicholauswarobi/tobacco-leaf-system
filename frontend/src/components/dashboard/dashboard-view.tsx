@@ -155,10 +155,10 @@ export function DashboardView() {
     : [];
 
   return (
-    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-12 sm:py-16">
-      <header className="flex flex-wrap items-end justify-between gap-4 mb-10">
+    <section className="mx-auto max-w-7xl px-4 sm:px-5 py-8 sm:py-10">
+      <header className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-leaf-700 dark:text-leaf-300">
+          <p className="text-xs font-semibold tracking-wide text-leaf-700 dark:text-leaf-300">
             {t("dash.eyebrow")}
           </p>
           <h1 className="mt-3 font-display text-4xl sm:text-5xl tracking-tight">
@@ -190,20 +190,20 @@ export function DashboardView() {
       ) : (
         <>
           {/* Stats grid */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-5">
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-5"
+                className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+                  <span className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
                     {s.label}
                   </span>
                   <s.icon className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
                 </div>
                 {loading ? (
-                  <div className="mt-4 h-7 w-16 animate-pulse rounded-md bg-[var(--border)]" />
+                  <div className="mt-4 h-7 w-16 animate-pulse rounded bg-[var(--border)]" />
                 ) : (
                   <p className="mt-3 font-display text-3xl tracking-tight">
                     {s.value}
@@ -214,15 +214,15 @@ export function DashboardView() {
           </div>
 
           {/* Charts */}
-          <div className="grid gap-6 lg:grid-cols-5 mb-8">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-6 lg:col-span-3">
+          <div className="grid gap-4 lg:grid-cols-5 mb-5">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4 lg:col-span-3">
               <h3 className="font-display text-xl tracking-tight">
                 {t("dash.diseaseChart")}
               </h3>
               <p className="text-sm text-[var(--fg-muted)]">
                 {t("dash.diseaseChartSub")}
               </p>
-              <div className="mt-6 h-72">
+              <div className="mt-4 h-72">
                 {loading ? (
                   <ChartSkeleton />
                 ) : diseaseChart.length === 0 ? (
@@ -252,14 +252,14 @@ export function DashboardView() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-6 lg:col-span-2">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4 lg:col-span-2">
               <h3 className="font-display text-xl tracking-tight">
                 {t("dash.gradeChart")}
               </h3>
               <p className="text-sm text-[var(--fg-muted)]">
                 {t("dash.gradeChartSub")}
               </p>
-              <div className="mt-6 h-72">
+              <div className="mt-4 h-72">
                 {loading ? (
                   <ChartSkeleton />
                 ) : gradeChart.length === 0 ? (
@@ -301,8 +301,8 @@ export function DashboardView() {
           </div>
 
           {/* Recent activity */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
               <h3 className="font-display text-xl tracking-tight">
                 {t("dash.recent")}
               </h3>
@@ -317,8 +317,8 @@ export function DashboardView() {
             {loading ? (
               <div className="divide-y divide-[var(--border)]">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-6 py-4">
-                    <div className="h-10 w-10 shrink-0 animate-pulse rounded-lg bg-[var(--border)]" />
+                  <div key={i} className="flex items-center gap-3 px-4 py-4">
+                    <div className="h-10 w-10 shrink-0 animate-pulse rounded-md bg-[var(--border)]" />
                     <div className="flex-1 space-y-2">
                       <div className="h-3.5 w-40 animate-pulse rounded bg-[var(--border)]" />
                       <div className="h-3 w-24 animate-pulse rounded bg-[var(--border)]" />
@@ -331,7 +331,7 @@ export function DashboardView() {
                 {data.items.slice(0, 8).map((it) => (
                   <div
                     key={it.id}
-                    className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-leaf-50/40 dark:hover:bg-leaf-900/20 transition-colors"
+                    className="flex items-center justify-between gap-4 px-4 py-4 hover:bg-leaf-50/40 dark:hover:bg-leaf-900/20 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {it.image_url ? (
@@ -339,10 +339,10 @@ export function DashboardView() {
                         <img
                           src={api.asset(it.image_url)}
                           alt=""
-                          className="h-10 w-10 rounded-lg object-cover bg-leaf-100"
+                          className="h-10 w-10 rounded-md object-cover bg-leaf-100"
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-lg bg-leaf-100 dark:bg-leaf-800/40 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-md bg-leaf-100 dark:bg-leaf-800/40 flex items-center justify-center">
                           <Leaf className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
                         </div>
                       )}
@@ -394,7 +394,7 @@ export function DashboardView() {
 
 function ChartSkeleton() {
   return (
-    <div className="flex h-full items-end gap-3 px-2 pb-6">
+    <div className="flex h-full items-end gap-3 px-2 pb-4">
       {[60, 85, 45, 70].map((h, i) => (
         <div
           key={i}

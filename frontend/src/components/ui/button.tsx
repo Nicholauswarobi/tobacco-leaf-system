@@ -23,13 +23,14 @@ const variants: Record<Variant, string> = {
     "border border-[var(--border)] bg-transparent hover:bg-[var(--bg-elev)] text-[var(--fg)]",
 };
 
+// Tightened, but `lg` stays at 44px — the smallest comfortable touch target,
+// and it is the primary action on a phone.
+// (`h-13`, used here before, silently did nothing: Tailwind's scale jumps 12 →
+// 14, so large buttons collapsed to the height of their own text.)
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-3 text-sm",
-  md: "h-11 px-5 text-sm",
-  // `h-13` was silently doing nothing — Tailwind's default scale jumps from 12
-  // to 14, so the class did not exist and every large button collapsed to the
-  // height of its own text (24px), well under a usable touch target.
-  lg: "h-[3.25rem] px-7 text-base",
+  sm: "h-8 px-2.5 text-sm",
+  md: "h-10 px-4 text-sm",
+  lg: "h-11 px-5 text-base",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -41,7 +42,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ref={ref}
       disabled={disabled || isLoading}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-wide",
+        "inline-flex items-center justify-center gap-2 rounded-md font-medium tracking-wide",
         "transition-all duration-200 ease-out",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         "active:scale-[0.98]",

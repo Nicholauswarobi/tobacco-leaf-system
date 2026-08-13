@@ -94,14 +94,14 @@ export function ServiceWorker() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[55] p-3 sm:left-auto sm:right-4 sm:max-w-sm">
-      <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-3 shadow-card">
+      <div className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-3 shadow-card">
         <RefreshCw className="h-4 w-4 shrink-0 text-leaf-700 dark:text-leaf-300" />
         <p className="min-w-0 flex-1 text-sm text-[var(--fg)]">
           {t("install.updateReady")}
         </p>
         <button
           onClick={() => waiting.postMessage({ type: "SKIP_WAITING" })}
-          className="shrink-0 rounded-full bg-leaf-700 px-4 py-2 text-sm font-medium text-parchment dark:bg-leaf-300 dark:text-leaf-900"
+          className="shrink-0 rounded-md bg-leaf-700 px-4 py-2 text-sm font-medium text-parchment dark:bg-leaf-300 dark:text-leaf-900"
         >
           {t("install.updateAction")}
         </button>

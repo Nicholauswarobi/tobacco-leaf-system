@@ -17,9 +17,9 @@ export function AnalysisSection({ mode }: { mode: "disease" | "quality" }) {
     // Tight on a phone, generous on a desktop. The old fixed sizes spent most
     // of a phone screen on the heading, pushing the photo and the button that
     // acts on it below the fold.
-    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-6 sm:py-12 lg:py-16">
-      <header className="mb-6 sm:mb-10 max-w-3xl">
-        <p className="text-xs uppercase tracking-[0.18em] text-leaf-700 dark:text-leaf-300">
+    <section className="mx-auto max-w-7xl px-4 sm:px-5 py-4 sm:py-8 lg:py-10">
+      <header className="mb-4 sm:mb-6 max-w-3xl">
+        <p className="text-xs font-semibold tracking-wide text-leaf-700 dark:text-leaf-300">
           {t(`${prefix}.eyebrow` as "disease.eyebrow")}
         </p>
         <h1 className="mt-2 sm:mt-3 font-display text-2xl sm:text-4xl lg:text-5xl tracking-tight">

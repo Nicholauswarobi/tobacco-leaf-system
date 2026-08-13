@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Manrope, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/layout/theme-provider";
@@ -9,16 +9,19 @@ import { Footer } from "@/components/layout/footer";
 import { ServiceWorker } from "@/components/pwa/service-worker";
 import { InstallBanner } from "@/components/pwa/install-button";
 
-const fraunces = Fraunces({
+// Headings. A grotesque with open counters reads cleanly at small sizes on a
+// phone, where the previous high-contrast serif went spindly.
+const display = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-display",
   display: "swap",
-  axes: ["opsz", "SOFT"],
+  weight: ["500", "600", "700"],
 });
 
-const manrope = Manrope({
+// Body. Inter is designed for screen text at exactly these sizes.
+const body = Inter({
   subsets: ["latin"],
-  variable: "--font-manrope",
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -98,7 +101,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fraunces.variable} ${manrope.variable} ${jetbrains.variable}`}
+      className={`${display.variable} ${body.variable} ${jetbrains.variable}`}
     >
       <body className="font-sans antialiased">
         <ThemeProvider>

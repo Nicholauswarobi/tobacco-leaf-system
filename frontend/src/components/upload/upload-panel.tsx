@@ -103,6 +103,9 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   const onCameraChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const f = e.target.files?.[0];
     if (f) acceptFile(f);
+    // Clearing the value lets the same photo be chosen twice in a row —
+    // otherwise the second selection is identical and `change` never fires.
+    e.target.value = "";
   };
 
   const reset = () => {
@@ -182,13 +185,14 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         <div
           {...getRootProps()}
           className={cn(
-            "relative rounded-3xl border-2 border-dashed transition-all",
+            "relative rounded-xl border-2 border-dashed transition-all",
             "flex items-center justify-center",
-            // The empty dropzone needs presence; once a photo fills it, the
-            // photo sets the height and a tall minimum only adds dead space.
+            // Sized to its contents now that the buttons sit outside it —
+            // the old minimum was set when they lived inside, and left a tall
+            // empty box behind once they moved.
             previewUrl
-              ? "p-3 sm:p-4"
-              : "min-h-[320px] sm:min-h-[380px] p-6 sm:p-8",
+              ? "p-2"
+              : "min-h-[180px] sm:min-h-[220px] p-4 sm:p-5",
             isDragActive
               ? "border-leaf-700 bg-leaf-50 dark:border-leaf-300 dark:bg-leaf-900/20"
               : "border-[var(--border)] bg-[var(--bg-elev)]"
@@ -202,67 +206,76 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
               <img
                 src={previewUrl}
                 alt="Preview"
-                className="max-h-[34vh] w-full rounded-2xl object-contain sm:max-h-[420px]"
+                className="max-h-[34vh] w-full rounded-lg object-contain sm:max-h-[420px]"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   reset();
                 }}
-                className="absolute top-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-md bg-black/60 text-white hover:bg-black/80"
                 aria-label={t("upload.remove")}
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-leaf-700 px-3 py-1.5 text-xs text-parchment">
+              <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded bg-leaf-700 px-2 py-1 text-xs text-parchment">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 {t("upload.ready")}
               </div>
             </div>
           ) : (
             <div className="text-center max-w-md">
-              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
+              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-lg bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
                 <ImagePlus className="h-6 w-6" />
               </div>
-              <h3 className="mt-5 font-display text-xl sm:text-2xl tracking-tight">
+              <h3 className="mt-4 font-display text-lg sm:text-xl tracking-tight">
                 {t("upload.dropTitle")}
               </h3>
-              <p className="mt-2 text-sm text-[var(--fg-muted)]">
+              <p className="mt-1.5 text-sm text-[var(--fg-muted)]">
                 {t("upload.dropBody")}
               </p>
-
-              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                <Button onClick={open} variant="primary" className="w-full sm:w-auto">
-                  <ImagePlus className="h-4 w-4" />
-                  {t("upload.choose")}
-                </Button>
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCameraClick();
-                  }}
-                  variant="outline"
-                  className="w-full sm:w-auto"
-                >
-                  <Camera className="h-4 w-4" />
-                  {t("upload.camera")}
-                </Button>
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={onCameraChange}
-                  className="hidden"
-                />
-              </div>
             </div>
           )}
         </div>
 
+        {/*
+          Both controls live OUTSIDE the dropzone root, and so does the camera
+          input. Inside it, `cameraInput.click()` dispatched a click that
+          bubbled up to react-dropzone's root handler, which opened the file
+          picker as well — so tapping "Use camera" showed the upload dialog,
+          and cancelling it revealed the camera dialog queued behind. Stopping
+          propagation on the button could not help: the programmatic click on
+          the input is a separate event.
+        */}
+        {!previewUrl && (
+          <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center">
+            <Button onClick={open} variant="primary" className="w-full sm:w-auto">
+              <ImagePlus className="h-4 w-4" />
+              {t("upload.choose")}
+            </Button>
+            <Button
+              onClick={onCameraClick}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              <Camera className="h-4 w-4" />
+              {t("upload.camera")}
+            </Button>
+          </div>
+        )}
+
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={onCameraChange}
+          className="hidden"
+        />
+
         {/* The action, directly under the photo it acts on. */}
         {file && (
-          <div className="mt-4" ref={actionRef}>
+          <div className="mt-3" ref={actionRef}>
             {isPredicting ? (
               <AnalysisProgress phase={phase} uploaded={uploaded} mode={mode} />
             ) : (
@@ -286,7 +299,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         {misrouted && (
           <div
             role="alert"
-            className="mt-4 rounded-xl border border-sky-300 bg-sky-50 px-4 py-4 text-sm text-sky-900 dark:border-sky-800/50 dark:bg-sky-950/30 dark:text-sky-100"
+            className="mt-4 rounded-lg border border-sky-300 bg-sky-50 px-4 py-4 text-sm text-sky-900 dark:border-sky-800/50 dark:bg-sky-950/30 dark:text-sky-100"
           >
             <div className="flex items-start gap-3">
               <Leaf className="mt-0.5 h-5 w-5 shrink-0" />
@@ -323,7 +336,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         {rejection && (
           <div
             role="alert"
-            className="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-100"
+            className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-100"
           >
             <div className="flex items-start gap-3">
               <Leaf className="mt-0.5 h-5 w-5 shrink-0" />
@@ -350,7 +363,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         )}
 
         {error && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
+          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
             {error}
           </div>
         )}

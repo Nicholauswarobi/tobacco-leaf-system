@@ -9,9 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        // Editorial serif for display headings, refined sans for body.
-        display: ["var(--font-fraunces)", "Georgia", "serif"],
-        sans: ["var(--font-manrope)", "system-ui", "sans-serif"],
+        // One sans family pairing: a slightly warmer grotesque for headings,
+        // Inter for everything else. Both stay legible at phone sizes.
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains)", "ui-monospace", "monospace"],
       },
       colors: {

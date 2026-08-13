@@ -20,7 +20,7 @@ export function LanguageToggle({ className }: { className?: string }) {
       role="group"
       aria-label={t("nav.language")}
       className={cn(
-        "inline-flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-elev)] p-0.5",
+        "inline-flex items-center gap-0.5 rounded-md border border-[var(--border)] bg-[var(--bg-elev)] p-0.5",
         className
       )}
     >
@@ -40,7 +40,7 @@ export function LanguageToggle({ className }: { className?: string }) {
             className={cn(
               // min-h-8 rather than padding alone: at py-1 the segments were
               // 24px tall, below a comfortable thumb target on a phone.
-              "inline-flex min-h-8 items-center rounded-full px-2.5 text-xs font-semibold transition-colors",
+              "inline-flex min-h-8 items-center rounded px-2.5 text-xs font-semibold transition-colors",
               active
                 ? "bg-leaf-700 text-parchment dark:bg-leaf-300 dark:text-leaf-900"
                 : "text-[var(--fg-muted)] hover:text-[var(--fg)]"

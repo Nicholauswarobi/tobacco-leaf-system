@@ -23,13 +23,13 @@ export function ConnectionError({
   onRetry: () => void;
 }) {
   return (
-    <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] px-6 py-16 text-center">
-      <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-10 text-center">
+      <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
         <WifiOff className="h-5 w-5" />
       </div>
-      <h3 className="mt-5 font-display text-2xl tracking-tight">{title}</h3>
+      <h3 className="mt-3 font-display text-2xl tracking-tight">{title}</h3>
       <p className="mx-auto mt-2 max-w-md text-sm text-[var(--fg-muted)]">{body}</p>
-      <Button className="mt-6" onClick={onRetry}>
+      <Button className="mt-4" onClick={onRetry}>
         <RefreshCw className="h-4 w-4" />
         {retry}
       </Button>

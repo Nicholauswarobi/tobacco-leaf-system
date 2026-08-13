@@ -59,28 +59,28 @@ export function AboutView() {
   ];
 
   return (
-    <section className="mx-auto max-w-5xl px-5 sm:px-8 py-16 sm:py-24">
-      <p className="text-xs uppercase tracking-[0.18em] text-leaf-700 dark:text-leaf-300">
+    <section className="mx-auto max-w-5xl px-4 sm:px-5 py-10 sm:py-24">
+      <p className="text-xs font-semibold tracking-wide text-leaf-700 dark:text-leaf-300">
         {t("about.eyebrow")}
       </p>
       <h1 className="mt-3 font-display text-4xl sm:text-6xl tracking-tight leading-[1.05]">
         {t("about.title")}
       </h1>
-      <p className="mt-6 max-w-3xl text-lg text-[var(--fg-muted)] leading-relaxed">
+      <p className="mt-4 max-w-3xl text-lg text-[var(--fg-muted)] leading-relaxed">
         {t("about.lead")}
       </p>
 
       {/* What it does */}
-      <div className="mt-14 grid gap-6 sm:grid-cols-3">
+      <div className="mt-14 grid gap-4 sm:grid-cols-3">
         {does.map((d) => (
           <div
             key={d.title}
-            className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-7"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4"
           >
-            <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
+            <div className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
               <d.icon className="h-5 w-5" />
             </div>
-            <h2 className="mt-5 font-display text-2xl tracking-tight">
+            <h2 className="mt-3 font-display text-2xl tracking-tight">
               {t(d.title)}
             </h2>
             <p className="mt-2 text-[var(--fg-muted)] leading-relaxed">
@@ -91,14 +91,14 @@ export function AboutView() {
       </div>
 
       {/* Taking a good photo */}
-      <div className="mt-14 rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-8">
+      <div className="mt-14 rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-5">
         <h2 className="font-display text-3xl tracking-tight">
           {t("about.howTitle")}
         </h2>
-        <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
           {photoTips.map((tip) => (
             <li key={tip.key} className="flex items-start gap-3">
-              <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
+              <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
                 <tip.icon className="h-4 w-4" />
               </span>
               <span className="text-[var(--fg)] leading-relaxed">{t(tip.key)}</span>
@@ -112,10 +112,10 @@ export function AboutView() {
         <h2 className="font-display text-3xl tracking-tight">
           {t("about.sectionsTitle")}
         </h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Link
             href="/disease"
-            className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-6 transition-all hover:-translate-y-0.5 hover:shadow-card"
+            className="group rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-card"
           >
             <p className="font-display text-xl">{t("about.sections1.title")}</p>
             <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-leaf-700 dark:text-leaf-300">
@@ -125,7 +125,7 @@ export function AboutView() {
           </Link>
           <Link
             href="/quality"
-            className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-6 transition-all hover:-translate-y-0.5 hover:shadow-card"
+            className="group rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4 transition-all hover:-translate-y-0.5 hover:shadow-card"
           >
             <p className="font-display text-xl">{t("about.sections2.title")}</p>
             <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-leaf-700 dark:text-leaf-300">
@@ -145,14 +145,14 @@ export function AboutView() {
         <h2 className="font-display text-3xl tracking-tight">
           {t("about.gradesTitle")}
         </h2>
-        <div className="mt-6 space-y-3">
+        <div className="mt-4 space-y-3">
           {grades.map((g) => (
             <div
               key={g.grade}
-              className="flex items-start gap-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-5"
+              className="flex items-start gap-4 rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4"
             >
               <span
-                className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-display text-xl ${g.tone}`}
+                className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg font-display text-xl ${g.tone}`}
               >
                 {g.grade}
               </span>
@@ -163,9 +163,9 @@ export function AboutView() {
       </div>
 
       {/* The one warning that matters */}
-      <div className="mt-14 rounded-3xl border border-amber-300 bg-amber-50 p-8 dark:border-amber-800/50 dark:bg-amber-950/20">
+      <div className="mt-14 rounded-xl border border-amber-300 bg-amber-50 p-5 dark:border-amber-800/50 dark:bg-amber-950/20">
         <div className="flex items-start gap-4">
-          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-200 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200">
+          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-amber-200 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200">
             <AlertTriangle className="h-5 w-5" />
           </span>
           <div>
@@ -180,14 +180,14 @@ export function AboutView() {
       </div>
 
       {/* CTA */}
-      <div className="mt-14 rounded-3xl bg-leaf-800 px-8 py-14 text-center dark:bg-leaf-200">
+      <div className="mt-14 rounded-xl bg-leaf-800 px-5 py-9 text-center dark:bg-leaf-200">
         <h2 className="font-display text-3xl tracking-tight text-parchment dark:text-leaf-900 sm:text-4xl">
           {t("about.ctaTitle")}
         </h2>
         <p className="mx-auto mt-3 max-w-md text-leaf-100 dark:text-leaf-800">
           {t("about.ctaBody")}
         </p>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-5 flex justify-center">
           <Link href="/disease">
             <Button
               size="lg"

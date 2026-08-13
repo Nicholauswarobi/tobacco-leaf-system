@@ -10,7 +10,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--bg)] mt-16">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-5 py-8">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
             <Logo />
@@ -20,7 +20,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)] mb-4">
+            <h4 className="text-xs font-semibold tracking-wide text-[var(--fg-muted)] mb-4">
               {t("footer.use")}
             </h4>
             <ul className="space-y-2 text-sm">
@@ -31,7 +31,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)] mb-4">
+            <h4 className="text-xs font-semibold tracking-wide text-[var(--fg-muted)] mb-4">
               {t("footer.learn")}
             </h4>
             <ul className="space-y-2 text-sm">
@@ -41,7 +41,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-[var(--border)] pt-6 text-xs text-[var(--fg-muted)]">
+        <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-[var(--border)] pt-4 text-xs text-[var(--fg-muted)]">
           <p>© {new Date().getFullYear()} TobaccoScan. {t("footer.rights")}</p>
         </div>
       </div>

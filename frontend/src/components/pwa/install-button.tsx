@@ -61,7 +61,7 @@ export function InstallButton({
           else setShowSteps(true);
         }}
         className={cn(
-          "inline-flex h-9 items-center gap-1.5 rounded-full border border-leaf-200 bg-leaf-50 px-3",
+          "inline-flex h-9 items-center gap-1.5 rounded-md border border-leaf-200 bg-leaf-50 px-3",
           "text-sm font-medium text-leaf-900 transition-colors hover:bg-leaf-100",
           "dark:border-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-100 dark:hover:bg-leaf-800/70",
           className
@@ -131,8 +131,8 @@ export function InstallBanner() {
       <div aria-hidden className="h-28 sm:hidden" />
 
       <div className="fixed inset-x-0 bottom-0 z-50 p-3 sm:hidden">
-        <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-3 shadow-card">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-leaf-700 dark:bg-leaf-300">
+        <div className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-3 shadow-card">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-leaf-700 dark:bg-leaf-300">
             <Download className="h-5 w-5 text-parchment dark:text-leaf-900" />
           </span>
 
@@ -156,7 +156,7 @@ export function InstallBanner() {
                 setShowSteps(true);
               }
             }}
-            className="shrink-0 rounded-full bg-leaf-700 px-4 py-2 text-sm font-medium text-parchment dark:bg-leaf-300 dark:text-leaf-900"
+            className="shrink-0 rounded-md bg-leaf-700 px-4 py-2 text-sm font-medium text-parchment dark:bg-leaf-300 dark:text-leaf-900"
           >
             {t("install.button")}
           </button>
@@ -164,7 +164,7 @@ export function InstallBanner() {
           <button
             onClick={dismiss}
             aria-label={t("install.dismiss")}
-            className="shrink-0 rounded-full p-1 text-[var(--fg-muted)] hover:bg-leaf-100 dark:hover:bg-leaf-800/50"
+            className="shrink-0 rounded p-1 text-[var(--fg-muted)] hover:bg-leaf-100 dark:hover:bg-leaf-800/50"
           >
             <X className="h-4 w-4" />
           </button>
@@ -200,7 +200,7 @@ function InstalledToast({ message }: { message: string }) {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 p-3 sm:bottom-4">
-      <div className="mx-auto flex max-w-sm items-center gap-2 rounded-full border border-leaf-200 bg-leaf-50 px-4 py-3 text-sm text-leaf-900 shadow-card dark:border-leaf-700 dark:bg-leaf-800 dark:text-leaf-50">
+      <div className="mx-auto flex max-w-sm items-center gap-2 rounded-md border border-leaf-200 bg-leaf-50 px-4 py-3 text-sm text-leaf-900 shadow-card dark:border-leaf-700 dark:bg-leaf-800 dark:text-leaf-50">
         <Check className="h-4 w-4 shrink-0" />
         <span>{message}</span>
       </div>
@@ -246,13 +246,13 @@ function InstallInstructions({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-3 backdrop-blur-sm sm:items-center"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-5 shadow-card"
+        className="w-full max-w-sm rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4 shadow-card"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
@@ -262,7 +262,7 @@ function InstallInstructions({
           <button
             onClick={onClose}
             aria-label={t("install.dismiss")}
-            className="rounded-full p-1 text-[var(--fg-muted)] hover:bg-leaf-100 dark:hover:bg-leaf-800/50"
+            className="rounded p-1 text-[var(--fg-muted)] hover:bg-leaf-100 dark:hover:bg-leaf-800/50"
           >
             <X className="h-4 w-4" />
           </button>
@@ -274,7 +274,7 @@ function InstallInstructions({
           the entry, and nothing on screen explains why.
         */}
         {!isSecureContext && (
-          <div className="mt-4 flex gap-3 rounded-xl border border-tobacco-300 bg-tobacco-50 p-3 dark:border-tobacco-600 dark:bg-tobacco-800/40">
+          <div className="mt-4 flex gap-3 rounded-lg border border-tobacco-300 bg-tobacco-50 p-3 dark:border-tobacco-600 dark:bg-tobacco-800/40">
             <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-tobacco-700 dark:text-tobacco-200" />
             <div className="text-xs leading-relaxed text-tobacco-900 dark:text-tobacco-100">
               <p className="font-semibold">{t("install.insecureTitle")}</p>
@@ -286,7 +286,7 @@ function InstallInstructions({
         <ol className="mt-4 space-y-3 text-sm text-[var(--fg-muted)]">
           {steps.map(({ icon: Icon, key }) => (
             <li key={key} className="flex items-center gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-leaf-100 text-leaf-800 dark:bg-leaf-800/60 dark:text-leaf-100">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-leaf-100 text-leaf-800 dark:bg-leaf-800/60 dark:text-leaf-100">
                 <Icon className="h-4 w-4" />
               </span>
               <span>{t(key)}</span>
@@ -296,7 +296,7 @@ function InstallInstructions({
 
         <button
           onClick={onClose}
-          className="mt-5 w-full rounded-full bg-leaf-700 px-4 py-3 text-sm font-medium text-parchment dark:bg-leaf-300 dark:text-leaf-900"
+          className="mt-3 w-full rounded-md bg-leaf-700 px-4 py-3 text-sm font-medium text-parchment dark:bg-leaf-300 dark:text-leaf-900"
         >
           {t("install.gotIt")}
         </button>

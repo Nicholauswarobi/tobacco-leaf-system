@@ -63,7 +63,7 @@ export function AnalysisProgress({ phase, uploaded, mode }: Props) {
     <div
       role="status"
       aria-live="polite"
-      className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-4 sm:p-5"
+      className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-3 sm:p-4"
     >
       <div className="flex items-center gap-3">
         <Loader2 className="h-4 w-4 shrink-0 animate-spin text-leaf-700 dark:text-leaf-300" />

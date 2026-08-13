@@ -133,9 +133,9 @@ export function ResultView() {
     );
 
   return (
-    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-10 sm:py-14">
+    <section className="mx-auto max-w-7xl px-4 sm:px-5 py-6 sm:py-9">
       {/* Top bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <Link
           href={sameSectionHref}
           className="inline-flex items-center gap-2 text-sm text-[var(--fg-muted)] hover:text-[var(--fg)]"
@@ -163,9 +163,9 @@ export function ResultView() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-10"
+        className="mb-6"
       >
-        <p className="text-xs uppercase tracking-[0.18em] text-leaf-700 dark:text-leaf-300">
+        <p className="text-xs font-semibold tracking-wide text-leaf-700 dark:text-leaf-300">
           {mode === "quality"
             ? t("result.doneQuality")
             : mode === "disease"
@@ -203,7 +203,7 @@ export function ResultView() {
         )}
       </motion.header>
 
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid gap-4 lg:grid-cols-12">
         {/* Image preview */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -211,8 +211,8 @@ export function ResultView() {
           transition={{ duration: 0.5, delay: 0.05 }}
           className="lg:col-span-5"
         >
-          <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-3 shadow-card sticky top-24">
-            <div className="aspect-square w-full overflow-hidden rounded-2xl bg-leaf-50 dark:bg-leaf-900/30 relative">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-3 shadow-card sticky top-24">
+            <div className="aspect-square w-full overflow-hidden rounded-lg bg-leaf-50 dark:bg-leaf-900/30 relative">
               {image_url ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
@@ -244,7 +244,7 @@ export function ResultView() {
         </motion.div>
 
         {/* Right column: results */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-4">
 
           {/* ── Disease card ── */}
           {showDisease && (
@@ -252,11 +252,11 @@ export function ResultView() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-5 sm:p-7 shadow-card"
+              className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-4 sm:p-4 shadow-card"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+                  <p className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
                     {t("result.diseaseSection")}
                   </p>
                   <h2 className="mt-2 font-display text-2xl sm:text-3xl tracking-tight">
@@ -264,7 +264,7 @@ export function ResultView() {
                   </h2>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+                  <p className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
                     {t("common.confidence")}
                   </p>
                   <p className="mt-1 font-display text-2xl sm:text-3xl text-leaf-700 dark:text-leaf-300">
@@ -277,7 +277,7 @@ export function ResultView() {
                 {diseaseDescription(disease.label, disease.description, lang)}
               </p>
 
-              <div className="mt-6 grid gap-3">
+              <div className="mt-4 grid gap-3">
                 {disease.all_probabilities.map((p, i) => (
                   <ConfidenceBar
                     key={p.label}
@@ -298,7 +298,7 @@ export function ResultView() {
                 />
               ) : (
                 disease.recommendations.length > 0 && (
-                  <div className="mt-7 rounded-2xl bg-leaf-50 dark:bg-leaf-900/30 border border-leaf-200/60 dark:border-leaf-700/30 p-5">
+                  <div className="mt-4 rounded-lg bg-leaf-50 dark:bg-leaf-900/30 border border-leaf-200/60 dark:border-leaf-700/30 p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
                       <h3 className="font-display text-lg">
@@ -325,7 +325,7 @@ export function ResultView() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: showDisease ? 0.15 : 0.1 }}
-              className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-5 sm:p-7 shadow-card"
+              className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-4 sm:p-4 shadow-card"
             >
               {/*
                 Grade and confidence sit on one row; the market-value chip gets
@@ -336,7 +336,7 @@ export function ResultView() {
               */}
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+                  <p className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
                     {t("result.qualitySection")}
                   </p>
                   <h2 className="mt-2 font-display text-2xl sm:text-3xl tracking-tight">
@@ -344,7 +344,7 @@ export function ResultView() {
                   </h2>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+                  <p className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
                     {t("common.confidence")}
                   </p>
                   <p className="mt-1 font-display text-2xl sm:text-3xl text-tobacco-700 dark:text-tobacco-300">
@@ -362,7 +362,7 @@ export function ResultView() {
                 {gradeDescription(quality.grade, quality.description, lang)}
               </p>
 
-              <div className="mt-6 grid gap-3">
+              <div className="mt-4 grid gap-3">
                 {quality.all_probabilities.map((p, i) => (
                   <ConfidenceBar
                     key={p.label}
@@ -382,7 +382,7 @@ export function ResultView() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] px-5 py-4 text-sm text-[var(--fg-muted)]"
+              className="flex items-start gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-4 text-sm text-[var(--fg-muted)]"
             >
               <Info className="h-4 w-4 shrink-0 mt-0.5 text-leaf-700 dark:text-leaf-300" />
               <p>{t("result.noQualityModel")}</p>
@@ -396,7 +396,7 @@ export function ResultView() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.25 }}
-        className="mt-8 flex flex-col gap-4 rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-7 sm:flex-row sm:items-center sm:justify-between"
+        className="mt-5 flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
           <h3 className="font-display text-2xl tracking-tight">
@@ -436,7 +436,7 @@ function TreatmentPanel({
   const { urgency, summary, medicines, actions, caution } = treatment;
 
   return (
-    <div className="mt-7 rounded-2xl border border-leaf-200/60 bg-leaf-50 p-5 dark:border-leaf-700/30 dark:bg-leaf-900/30">
+    <div className="mt-4 rounded-lg border border-leaf-200/60 bg-leaf-50 p-4 dark:border-leaf-700/30 dark:bg-leaf-900/30">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-display text-lg">{t("tx.title")}</h3>
         <Badge tone={healthy ? "success" : "warning"}>{urgency}</Badge>
@@ -444,10 +444,10 @@ function TreatmentPanel({
       <p className="mt-2 text-sm text-[var(--fg)]">{summary}</p>
 
       {medicines.length > 0 && (
-        <div className="mt-5">
+        <div className="mt-3">
           <div className="flex items-center gap-2">
             <Pill className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
-            <h4 className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
+            <h4 className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
               {t("tx.medicine")}
             </h4>
           </div>
@@ -455,7 +455,7 @@ function TreatmentPanel({
             {medicines.map((m) => (
               <li
                 key={m.name}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-3"
+                className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-3"
               >
                 <p className="text-sm font-medium text-[var(--fg)]">{m.name}</p>
                 <p className="mt-0.5 text-xs text-[var(--fg-muted)]">
@@ -468,7 +468,7 @@ function TreatmentPanel({
       )}
 
       {actions.length > 0 && (
-        <ul className="mt-5 space-y-2">
+        <ul className="mt-3 space-y-2">
           {actions.map((a) => (
             <li key={a} className="flex items-start gap-2.5 text-sm">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-leaf-700 dark:text-leaf-300" />
@@ -479,7 +479,7 @@ function TreatmentPanel({
       )}
 
       {caution && (
-        <p className="mt-5 border-t border-leaf-200/60 pt-3 text-xs text-[var(--fg-muted)] dark:border-leaf-700/30">
+        <p className="mt-3 border-t border-leaf-200/60 pt-3 text-xs text-[var(--fg-muted)] dark:border-leaf-700/30">
           {caution}
         </p>
       )}
