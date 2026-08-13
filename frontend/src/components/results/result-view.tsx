@@ -133,9 +133,9 @@ export function ResultView() {
     );
 
   return (
-    <section className="mx-auto max-w-7xl px-4 sm:px-5 py-6 sm:py-9">
+    <section className="mx-auto max-w-7xl px-3 sm:px-3 py-4 sm:py-5">
       {/* Top bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <Link
           href={sameSectionHref}
           className="inline-flex items-center gap-2 text-sm text-[var(--fg-muted)] hover:text-[var(--fg)]"
@@ -163,7 +163,7 @@ export function ResultView() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-6"
+        className="mb-4"
       >
         <p className="text-xs font-semibold tracking-wide text-leaf-700 dark:text-leaf-300">
           {mode === "quality"
@@ -172,10 +172,10 @@ export function ResultView() {
             ? t("result.doneDisease")
             : t("result.doneFull")}
         </p>
-        <h1 className="mt-3 font-display text-4xl sm:text-5xl tracking-tight">
+        <h1 className="mt-2 font-display text-4xl sm:text-5xl tracking-tight">
           {heading}
         </h1>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-[var(--fg-muted)]">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[var(--fg-muted)]">
           <span className="inline-flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
             {formatDate(timestamp)}
@@ -186,10 +186,10 @@ export function ResultView() {
           <span className="font-mono">id {latest.id.slice(0, 8)}</span>
         </div>
 
-        {/* Verification passed before any analysis ran — say so, so users know
+        {/* Verification passed before any analysis ran, say so, so users know
             the result is about a leaf the system actually recognised. */}
         {latest.verification?.is_tobacco && (
-          <div className="mt-4">
+          <div className="mt-3">
             <Badge tone="success">
               <CheckCircle2 className="h-3 w-3" />
               {latest.verification.message}
@@ -203,7 +203,7 @@ export function ResultView() {
         )}
       </motion.header>
 
-      <div className="grid gap-4 lg:grid-cols-12">
+      <div className="grid gap-2.5 lg:grid-cols-12">
         {/* Image preview */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -211,8 +211,8 @@ export function ResultView() {
           transition={{ duration: 0.5, delay: 0.05 }}
           className="lg:col-span-5"
         >
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-3 shadow-card sticky top-24">
-            <div className="aspect-square w-full overflow-hidden rounded-lg bg-leaf-50 dark:bg-leaf-900/30 relative">
+          <div className="rounded-md border border-[var(--border)] bg-[var(--bg-elev)] p-2 shadow-card sticky top-24">
+            <div className="aspect-square w-full overflow-hidden rounded bg-leaf-50 dark:bg-leaf-900/30 relative">
               {image_url ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
@@ -244,7 +244,7 @@ export function ResultView() {
         </motion.div>
 
         {/* Right column: results */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className="lg:col-span-7 space-y-2.5">
 
           {/* ── Disease card ── */}
           {showDisease && (
@@ -252,9 +252,9 @@ export function ResultView() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-4 sm:p-4 shadow-card"
+              className="rounded-md border border-[var(--border)] bg-[var(--bg-elev)] p-3 sm:p-3 shadow-card"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-2.5">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
                     {t("result.diseaseSection")}
@@ -273,11 +273,11 @@ export function ResultView() {
                 </div>
               </div>
 
-              <p className="mt-4 text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed">
                 {diseaseDescription(disease.label, disease.description, lang)}
               </p>
 
-              <div className="mt-4 grid gap-3">
+              <div className="mt-3 grid gap-2">
                 {disease.all_probabilities.map((p, i) => (
                   <ConfidenceBar
                     key={p.label}
@@ -298,8 +298,8 @@ export function ResultView() {
                 />
               ) : (
                 disease.recommendations.length > 0 && (
-                  <div className="mt-4 rounded-lg bg-leaf-50 dark:bg-leaf-900/30 border border-leaf-200/60 dark:border-leaf-700/30 p-4">
-                    <div className="flex items-center gap-2 mb-3">
+                  <div className="mt-3 rounded bg-leaf-50 dark:bg-leaf-900/30 border border-leaf-200/60 dark:border-leaf-700/30 p-3">
+                    <div className="flex items-center gap-2 mb-2">
                       <Sparkles className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
                       <h3 className="font-display text-lg">
                         {t("result.recommendations")}
@@ -325,16 +325,16 @@ export function ResultView() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: showDisease ? 0.15 : 0.1 }}
-              className="rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-4 sm:p-4 shadow-card"
+              className="rounded-md border border-[var(--border)] bg-[var(--bg-elev)] p-3 sm:p-3 shadow-card"
             >
               {/*
                 Grade and confidence sit on one row; the market-value chip gets
                 its own line beneath. It used to live inside the <h2> next to
-                the grade, where a phrase as long as "Highest — premium export
+                the grade, where a phrase as long as "Highest, premium export
                 pricing" was squeezed into a narrow column and wrapped to four
                 lines inside a pill.
               */}
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-2.5">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
                     {t("result.qualitySection")}
@@ -353,16 +353,16 @@ export function ResultView() {
                 </div>
               </div>
 
-              <Badge tone={gradeTone(quality.grade)} className="mt-3">
+              <Badge tone={gradeTone(quality.grade)} className="mt-2">
                 <Award className="h-3 w-3 shrink-0" />
                 {marketValue(quality.grade, quality.market_value, lang)}
               </Badge>
 
-              <p className="mt-4 text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed">
                 {gradeDescription(quality.grade, quality.description, lang)}
               </p>
 
-              <div className="mt-4 grid gap-3">
+              <div className="mt-3 grid gap-2">
                 {quality.all_probabilities.map((p, i) => (
                   <ConfidenceBar
                     key={p.label}
@@ -382,7 +382,7 @@ export function ResultView() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="flex items-start gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-4 text-sm text-[var(--fg-muted)]"
+              className="flex items-start gap-2 rounded border border-[var(--border)] bg-[var(--bg-elev)] px-3 py-2.5 text-sm text-[var(--fg-muted)]"
             >
               <Info className="h-4 w-4 shrink-0 mt-0.5 text-leaf-700 dark:text-leaf-300" />
               <p>{t("result.noQualityModel")}</p>
@@ -396,7 +396,7 @@ export function ResultView() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.25 }}
-        className="mt-5 flex flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--bg-elev)] p-4 sm:flex-row sm:items-center sm:justify-between"
+        className="mt-3 flex flex-col gap-2.5 rounded-md border border-[var(--border)] bg-[var(--bg-elev)] p-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
           <h3 className="font-display text-2xl tracking-tight">
@@ -406,7 +406,7 @@ export function ResultView() {
             {t("result.againBody", { section: sameSectionLabel })}
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           <Button onClick={analyzeAnother}>
             <ImagePlus className="h-4 w-4" />
             {t("result.againButton", { section: sameSectionLabel })}
@@ -422,7 +422,7 @@ export function ResultView() {
 
 /**
  * What to do about the detected disease: the medicine to spray, its rate and
- * interval, and two or three field actions. Kept short on purpose — this is
+ * interval, and two or three field actions. Kept short on purpose, this is
  * read on a phone in the field, not at a desk.
  */
 function TreatmentPanel({
@@ -436,7 +436,7 @@ function TreatmentPanel({
   const { urgency, summary, medicines, actions, caution } = treatment;
 
   return (
-    <div className="mt-4 rounded-lg border border-leaf-200/60 bg-leaf-50 p-4 dark:border-leaf-700/30 dark:bg-leaf-900/30">
+    <div className="mt-3 rounded border border-leaf-200/60 bg-leaf-50 p-3 dark:border-leaf-700/30 dark:bg-leaf-900/30">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-display text-lg">{t("tx.title")}</h3>
         <Badge tone={healthy ? "success" : "warning"}>{urgency}</Badge>
@@ -444,18 +444,18 @@ function TreatmentPanel({
       <p className="mt-2 text-sm text-[var(--fg)]">{summary}</p>
 
       {medicines.length > 0 && (
-        <div className="mt-3">
+        <div className="mt-2">
           <div className="flex items-center gap-2">
             <Pill className="h-4 w-4 text-leaf-700 dark:text-leaf-300" />
             <h4 className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
               {t("tx.medicine")}
             </h4>
           </div>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-2 space-y-2">
             {medicines.map((m) => (
               <li
                 key={m.name}
-                className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-3"
+                className="rounded border border-[var(--border)] bg-[var(--bg-elev)] px-3 py-2"
               >
                 <p className="text-sm font-medium text-[var(--fg)]">{m.name}</p>
                 <p className="mt-0.5 text-xs text-[var(--fg-muted)]">
@@ -468,7 +468,7 @@ function TreatmentPanel({
       )}
 
       {actions.length > 0 && (
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-2 space-y-2">
           {actions.map((a) => (
             <li key={a} className="flex items-start gap-2.5 text-sm">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-leaf-700 dark:text-leaf-300" />
@@ -479,7 +479,7 @@ function TreatmentPanel({
       )}
 
       {caution && (
-        <p className="mt-3 border-t border-leaf-200/60 pt-3 text-xs text-[var(--fg-muted)] dark:border-leaf-700/30">
+        <p className="mt-2 border-t border-leaf-200/60 pt-2 text-xs text-[var(--fg-muted)] dark:border-leaf-700/30">
           {caution}
         </p>
       )}

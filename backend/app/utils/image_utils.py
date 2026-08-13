@@ -1,4 +1,4 @@
-"""Image utilities — validation, secure save, basic preprocessing."""
+"""Image utilities: validation, secure save, basic preprocessing."""
 from __future__ import annotations
 import io
 import uuid
@@ -37,7 +37,7 @@ async def validate_and_load(file: UploadFile) -> Tuple[Image.Image, bytes, str]:
             detail=f"File too large ({size_mb:.1f} MB). Max {settings.MAX_UPLOAD_MB} MB.",
         )
 
-    # Decode — verifies the bytes are an actual image, not a renamed file.
+    # Decode: verifies the bytes are an actual image, not a renamed file.
     try:
         image = Image.open(io.BytesIO(raw))
         image.verify()  # quick header check

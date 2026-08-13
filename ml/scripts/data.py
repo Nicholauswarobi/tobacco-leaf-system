@@ -76,7 +76,7 @@ def make_datasets(
 
 
 def build_augmentation() -> tf.keras.Sequential:
-    """Augmentation block — applied via model.fit, not on disk."""
+    """Augmentation block: applied via model.fit, not on disk."""
     return tf.keras.Sequential(
         [
             layers.RandomFlip("horizontal_and_vertical"),

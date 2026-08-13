@@ -6,7 +6,7 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
     <div
       ref={ref}
       className={cn(
-        "rounded-lg border border-[var(--border)] bg-[var(--bg-elev)]",
+        "rounded border border-[var(--border)] bg-[var(--bg-elev)]",
         "shadow-card backdrop-blur-sm",
         className
       )}
@@ -17,11 +17,11 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
 Card.displayName = "Card";
 
 export const CardHeader = ({ className, ...rest }: HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("p-4 border-b border-[var(--border)]", className)} {...rest} />
+  <div className={cn("p-3 border-b border-[var(--border)]", className)} {...rest} />
 );
 
 export const CardBody = ({ className, ...rest }: HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("p-4", className)} {...rest} />
+  <div className={cn("p-3", className)} {...rest} />
 );
 
 export const CardTitle = ({ className, ...rest }: HTMLAttributes<HTMLHeadingElement>) => (

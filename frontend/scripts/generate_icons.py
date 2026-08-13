@@ -10,16 +10,16 @@ here, re-run it, and every size regenerates consistently.
 
 Two shapes are produced from the same drawing:
 
-* `any`      — the leaf fills the tile, which is what Android, Chrome and
+* `any`: the leaf fills the tile, which is what Android, Chrome and
                desktop installers show as-is.
-* `maskable` — the same leaf shrunk to ~60% of the tile, because the launcher
+* `maskable`: the same leaf shrunk to ~60% of the tile, because the launcher
                may crop the icon to a circle, squircle or rounded square. Only
                the middle 80% of a maskable icon is guaranteed visible, so a
                full-bleed drawing loses its tips to the crop.
 
 They are separate files on purpose. `"purpose": "any maskable"` on one file
 tells the browser a single image is correct under both treatments, which is
-only true for a drawing already padded for the crop — and that drawing then
+only true for a drawing already padded for the crop, and that drawing then
 looks small and lost everywhere else.
 """
 
@@ -75,7 +75,7 @@ def _leaf_outline(cx: float, cy: float, half_w: float, half_h: float):
 
 def _vertical_gradient(size: int, top: tuple[int, int, int],
                        bottom: tuple[int, int, int]) -> Image.Image:
-    """A one-pixel-wide gradient stretched to `size` — cheap and smooth."""
+    """A one-pixel-wide gradient stretched to `size`: cheap and smooth."""
     strip = Image.new("RGB", (1, size))
     px = strip.load()
     for y in range(size):
@@ -124,7 +124,7 @@ def _draw_icon(size: int, *, maskable: bool) -> Image.Image:
         width=rib,
     )
 
-    # Veins, mirrored off the midrib — the same three pairs as the logo.
+    # Veins, mirrored off the midrib, the same three pairs as the logo.
     vein = max(1, int(s * 0.010))
     for vy, spread, drop in ((11.0, 8.0, 6.0), (19.0, 7.5, 6.0), (27.0, 6.0, 5.0)):
         y0 = cy + (vy - 20) / 16 * half_h

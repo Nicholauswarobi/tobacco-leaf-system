@@ -72,13 +72,13 @@ async def verify(file: UploadFile = File(...)) -> VerificationResponse:
     "/predict/disease",
     response_model=PredictionResponse,
     summary="Detect diseases in a tobacco leaf image",
-    responses={422: {"description": "Not a tobacco leaf — disease detection was not run"}},
+    responses={422: {"description": "Not a tobacco leaf, so disease detection was not run"}},
 )
 async def predict_disease(file: UploadFile = File(...)) -> PredictionResponse:
     """Verify, then run disease detection, persist a history record, return JSON."""
     image, raw, ext = await validate_and_load(file)
 
-    # Stage 1 — nothing is written and no downstream model runs until this passes.
+    # Stage 1: nothing is written and no downstream model runs until this passes.
     outcome = verification_service.verify_or_raise(image)
 
     _, public_url = save_upload(raw, ext)
@@ -86,7 +86,7 @@ async def predict_disease(file: UploadFile = File(...)) -> PredictionResponse:
     try:
         result = predict_disease_only(image, image_url=public_url, verification=outcome)
     except (NotATobaccoLeafError, WrongSectionError):
-        raise  # handled globally — keeps one rejection shape across the API
+        raise  # handled globally: keeps one rejection shape across the API
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -101,7 +101,7 @@ async def predict_disease(file: UploadFile = File(...)) -> PredictionResponse:
     "/predict/quality",
     response_model=PredictionResponse,
     summary="Grade the quality of a tobacco leaf image",
-    responses={422: {"description": "Not a tobacco leaf — quality grading was not run"}},
+    responses={422: {"description": "Not a tobacco leaf, so quality grading was not run"}},
 )
 async def predict_quality(file: UploadFile = File(...)) -> PredictionResponse:
     """Verify, then run quality grading, persist a history record, return JSON."""
@@ -129,7 +129,7 @@ async def predict_quality(file: UploadFile = File(...)) -> PredictionResponse:
     "/predict",
     response_model=PredictionResponse,
     summary="Predict both disease and quality grade in one call",
-    responses={422: {"description": "Not a tobacco leaf — no analysis was run"}},
+    responses={422: {"description": "Not a tobacco leaf, so no analysis was run"}},
 )
 async def predict(
     file: UploadFile = File(...),

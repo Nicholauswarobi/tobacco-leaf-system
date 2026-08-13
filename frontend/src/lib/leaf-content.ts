@@ -171,7 +171,7 @@ export function marketValue(
 /**
  * Treatment block in the reader's language.
  *
- * Medicine product names are left untranslated on purpose — a farmer has to
+ * Medicine product names are left untranslated on purpose, a farmer has to
  * match them against what is printed on the container in the agrovet.
  */
 export function localizeTreatment(

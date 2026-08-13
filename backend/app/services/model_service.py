@@ -1,7 +1,7 @@
 """
 Model service: wraps the disease CNN and quality hybrid model.
 
-Designed to fail gracefully — if a .keras file isn't present (e.g. before
+Designed to fail gracefully: if a .keras file isn't present (e.g. before
 training), stub predictions are used so the API still returns valid responses
 for frontend dev.
 """
@@ -50,7 +50,7 @@ def _make_patches_layer():
     import tensorflow as tf  # type: ignore
 
     class Patches(tf.keras.layers.Layer):
-        """Extracts non-overlapping image patches — used by the ViT branch."""
+        """Extracts non-overlapping image patches: used by the ViT branch."""
 
         def __init__(self, patch_size, **kwargs):
             super().__init__(**kwargs)
@@ -91,7 +91,7 @@ class ModelService:
         # verification service falls back to the colour pre-screen instead.
         self.verification_threshold: float = settings.VERIFICATION_THRESHOLD
         self.verification_metadata: dict = {}
-        # Resolved from the loaded model's own input shape — the gate may be
+        # Resolved from the loaded model's own input shape, the gate may be
         # trained at a lower resolution than the disease model.
         self.verification_image_size: int = settings.IMAGE_SIZE
 
@@ -118,7 +118,7 @@ class ModelService:
         verification_path = Path(settings.VERIFICATION_MODEL_PATH)
         if not verification_path.exists():
             logger.warning(
-                "Verification model not found at %s — falling back to the colour "
+                "Verification model not found at %s: falling back to the colour "
                 "pre-screen. Train it with ml/scripts/train_verification.py.",
                 verification_path,
             )
@@ -138,7 +138,7 @@ class ModelService:
         # --- disease model ---
         disease_path = Path(settings.DISEASE_MODEL_PATH)
         if not disease_path.exists():
-            logger.warning("Disease model not found at %s — using stub.", disease_path)
+            logger.warning("Disease model not found at %s: using stub.", disease_path)
             self.use_disease_stub = True
         else:
             self.disease_model = load_model(str(disease_path))
@@ -147,7 +147,7 @@ class ModelService:
         # --- quality model (hybrid CNN+ViT) ---
         quality_path = Path(settings.QUALITY_MODEL_PATH)
         if not quality_path.exists():
-            logger.warning("Quality model not found at %s — using stub.", quality_path)
+            logger.warning("Quality model not found at %s: using stub.", quality_path)
             self.use_quality_stub = True
         else:
             self.quality_model = load_model(str(quality_path), custom_objects=custom_objects)
@@ -157,12 +157,12 @@ class ModelService:
         """Adopt the threshold that train_verification.py calibrated.
 
         Falls back to the configured default if the sidecar file is absent or
-        malformed — a missing metadata file should not take the gate offline.
+        malformed: a missing metadata file should not take the gate offline.
         """
         meta_path = Path(settings.VERIFICATION_METADATA_PATH)
         if not meta_path.exists():
             logger.info(
-                "No verification metadata at %s — using configured threshold %.2f.",
+                "No verification metadata at %s: using configured threshold %.2f.",
                 meta_path, self.verification_threshold,
             )
             return
@@ -170,7 +170,7 @@ class ModelService:
         try:
             meta = json.loads(meta_path.read_text())
         except (OSError, ValueError) as exc:
-            logger.warning("Could not read verification metadata (%s) — using default.", exc)
+            logger.warning("Could not read verification metadata (%s): using default.", exc)
             return
 
         self.verification_metadata = meta
@@ -181,7 +181,7 @@ class ModelService:
             logger.info("Verification threshold set to %.2f from metadata.", self.verification_threshold)
         else:
             logger.warning(
-                "Ignoring out-of-range threshold %r in %s — keeping %.2f.",
+                "Ignoring out-of-range threshold %r in %s: keeping %.2f.",
                 threshold, meta_path, self.verification_threshold,
             )
 
@@ -190,7 +190,7 @@ class ModelService:
         if classes and list(classes) != ["Not_Tobacco", "Tobacco"]:
             logger.error(
                 "Verification metadata declares classes %s but the service assumes "
-                "['Not_Tobacco', 'Tobacco']. Predictions will be inverted — retrain "
+                "['Not_Tobacco', 'Tobacco']. Predictions will be inverted, retrain "
                 "with the documented folder names.",
                 classes,
             )
@@ -227,7 +227,7 @@ class ModelService:
         """
         size = size or settings.IMAGE_SIZE
         image = image.convert("RGB").resize((size, size), Image.LANCZOS)
-        arr = np.asarray(image, dtype=np.float32)  # raw [0, 255] — model normalizes internally
+        arr = np.asarray(image, dtype=np.float32)  # raw [0, 255], model normalizes internally
         return np.expand_dims(arr, axis=0)
 
     # ---------- inference ----------
@@ -257,7 +257,7 @@ class ModelService:
     def predict_quality(self, image: Image.Image) -> List[float]:
         """Return quality grade probabilities as plain Python list.
 
-        The hybrid model expects raw [0, 255] float32 pixel values — same as
+        The hybrid model expects raw [0, 255] float32 pixel values, same as
         how the Streamlit app feeds it: resize → astype(float32) → expand_dims.
         """
         if self.use_quality_stub or self.quality_model is None:

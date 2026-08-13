@@ -33,7 +33,7 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "TobaccoScan — Tobacco Leaf Disease & Quality Grading",
+    default: "TobaccoScan: Tobacco Leaf Disease & Quality Grading",
     template: "%s · TobaccoScan",
   },
   description:
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
-  // iOS ignores the manifest for install behaviour and reads these instead —
+  // iOS ignores the manifest for install behaviour and reads these instead:
   // without them, "Add to Home Screen" opens the app in a Safari tab with the
   // browser chrome still showing.
   appleWebApp: {
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     "apple-mobile-web-app-capable": "yes",
   },
   openGraph: {
-    title: "TobaccoScan — Tobacco Leaf Diagnostics",
+    title: "TobaccoScan: Tobacco Leaf Diagnostics",
     description: "Detection of tobacco leaf diseases and quality grading powered by deep learning.",
     type: "website",
   },

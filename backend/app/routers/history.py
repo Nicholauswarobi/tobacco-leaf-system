@@ -1,4 +1,4 @@
-"""History endpoints — list, get, delete, CSV export."""
+"""History endpoints: list, get, delete, CSV export."""
 from io import StringIO
 import csv
 

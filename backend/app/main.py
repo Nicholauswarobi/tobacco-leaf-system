@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
         model_service.load_models()
         logger.info("Models loaded successfully")
     except Exception as exc:  # noqa: BLE001
-        # Don't crash the server if the model file is missing — fall back
+        # Don't crash the server if the model file is missing, fall back
         # to a stub predictor so the rest of the API stays usable.
         logger.warning("Model load failed (%s). Using stub predictor.", exc)
         model_service.use_stub = True

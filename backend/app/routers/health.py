@@ -28,7 +28,7 @@ async def health() -> HealthResponse:
 
 @router.get("/classes")
 async def classes():
-    """Return all class labels — useful for the frontend's legend UI."""
+    """Return all class labels: useful for the frontend's legend UI."""
     from app.services.model_service import (
         DISEASE_CLASSES,
         QUALITY_CLASSES,

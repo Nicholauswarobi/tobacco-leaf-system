@@ -2,7 +2,7 @@
 Lightweight SQLite-backed history service.
 
 Storing predictions for the dashboard, history page, and CSV export.
-For production, swap to PostgreSQL — schema is intentionally portable.
+For production, swap to PostgreSQL, schema is intentionally portable.
 """
 from __future__ import annotations
 import sqlite3
@@ -58,7 +58,7 @@ class HistoryService:
             try:
                 c.execute("ALTER TABLE predictions ADD COLUMN mode TEXT NOT NULL DEFAULT 'disease'")
             except Exception:
-                pass  # Column already exists — safe to ignore
+                pass  # Column already exists: safe to ignore
 
         self._repair_shifted_rows()
 
@@ -80,7 +80,7 @@ class HistoryService:
             quality_confidence held the quality grade
             mode               held the quality confidence
 
-        A row is only rewritten when it carries that exact fingerprint — a
+        A row is only rewritten when it carries that exact fingerprint, a
         mode name in `disease_label` *and* a number in `mode`. A correctly
         written row can never match both, so this is safe to run on every
         startup and does nothing once the data is clean.
@@ -97,7 +97,7 @@ class HistoryService:
                     disease_confidence = float(row["quality_grade"])
                     quality_confidence = float(row["mode"])
                 except (TypeError, ValueError):
-                    continue  # not the shifted pattern — leave it alone
+                    continue  # not the shifted pattern: leave it alone
 
                 c.execute(
                     """

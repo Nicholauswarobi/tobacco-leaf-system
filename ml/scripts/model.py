@@ -156,7 +156,7 @@ def build_verification_cnn(
     base with `training=True` while fine-tuning let the BN batch statistics
     drift away from the moving averages used at evaluation time, which on this
     dataset produced 99.9% training accuracy against 51.5% validation accuracy
-    (ROC AUC 0.91 — the ranking was fine, the decision boundary was not).
+    (ROC AUC 0.91: the ranking was fine, the decision boundary was not).
     Weights below `fine_tune_at` still train; only BN mode is pinned.
     """
     base = MobileNetV2(

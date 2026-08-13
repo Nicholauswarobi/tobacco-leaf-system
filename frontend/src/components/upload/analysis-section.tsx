@@ -17,15 +17,15 @@ export function AnalysisSection({ mode }: { mode: "disease" | "quality" }) {
     // Tight on a phone, generous on a desktop. The old fixed sizes spent most
     // of a phone screen on the heading, pushing the photo and the button that
     // acts on it below the fold.
-    <section className="mx-auto max-w-7xl px-4 sm:px-5 py-4 sm:py-8 lg:py-10">
-      <header className="mb-4 sm:mb-6 max-w-3xl">
+    <section className="mx-auto max-w-7xl px-3 sm:px-3 py-2.5 sm:py-5 lg:py-6">
+      <header className="mb-3 sm:mb-4 max-w-3xl">
         <p className="text-xs font-semibold tracking-wide text-leaf-700 dark:text-leaf-300">
           {t(`${prefix}.eyebrow` as "disease.eyebrow")}
         </p>
-        <h1 className="mt-2 sm:mt-3 font-display text-2xl sm:text-4xl lg:text-5xl tracking-tight">
+        <h1 className="mt-2 sm:mt-2 font-display text-2xl sm:text-4xl lg:text-5xl tracking-tight">
           {t(`${prefix}.title` as "disease.title")}
         </h1>
-        <p className="mt-2 sm:mt-4 text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed">
+        <p className="mt-2 sm:mt-3 text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed">
           {t(`${prefix}.lead` as "disease.lead")}
         </p>
       </header>

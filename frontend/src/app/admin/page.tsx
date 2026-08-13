@@ -33,36 +33,36 @@ export default function AdminPage() {
   };
 
   return (
-    <section className="mx-auto max-w-5xl px-4 sm:px-5 py-10">
-      <header className="mb-6">
+    <section className="mx-auto max-w-5xl px-3 sm:px-3 py-6">
+      <header className="mb-4">
         <p className="text-xs font-semibold tracking-wide text-leaf-700 dark:text-leaf-300">
           Restricted
         </p>
-        <h1 className="mt-3 font-display text-4xl sm:text-5xl tracking-tight">
+        <h1 className="mt-2 font-display text-4xl sm:text-5xl tracking-tight">
           Admin console
         </h1>
-        <p className="mt-3 text-[var(--fg-muted)] max-w-2xl">
+        <p className="mt-2 text-[var(--fg-muted)] max-w-2xl">
           Aggregate counts across all predictions. Requires the admin API
           key configured on the backend.
         </p>
       </header>
 
       {!stats ? (
-        <div className="max-w-md rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4">
-          <div className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
+        <div className="max-w-md rounded border border-[var(--border)] bg-[var(--bg-elev)] p-3">
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
             <Lock className="h-5 w-5" />
           </div>
-          <h2 className="mt-4 font-display text-2xl tracking-tight">
+          <h2 className="mt-3 font-display text-2xl tracking-tight">
             Enter API key
           </h2>
-          <form onSubmit={submit} className="mt-3 space-y-4">
+          <form onSubmit={submit} className="mt-2 space-y-2.5">
             <input
               type="password"
               required
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="x-api-key"
-              className="w-full h-11 px-4 rounded-md border border-[var(--border)] bg-[var(--bg)] text-sm focus:outline-none focus:border-leaf-600 font-mono"
+              className="w-full h-11 px-3 rounded-sm border border-[var(--border)] bg-[var(--bg)] text-sm focus:outline-none focus:border-leaf-600 font-mono"
             />
             {error && (
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -74,8 +74,8 @@ export default function AdminPage() {
           </form>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4">
+        <div className="space-y-2.5">
+          <div className="rounded border border-[var(--border)] bg-[var(--bg-elev)] p-3">
             <p className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
               Total predictions
             </p>
@@ -84,7 +84,7 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-2.5 lg:grid-cols-2">
             <BreakdownCard title="By disease" data={stats.by_disease} />
             <BreakdownCard title="By grade" data={stats.by_grade} />
           </div>
@@ -105,9 +105,9 @@ function BreakdownCard({
   const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-4">
+    <div className="rounded border border-[var(--border)] bg-[var(--bg-elev)] p-3">
       <h3 className="font-display text-xl tracking-tight">{title}</h3>
-      <div className="mt-3 space-y-3">
+      <div className="mt-2 space-y-2">
         {entries.length === 0 ? (
           <p className="text-sm text-[var(--fg-muted)]">No data yet.</p>
         ) : (

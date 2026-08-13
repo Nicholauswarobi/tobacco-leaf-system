@@ -27,7 +27,7 @@ export function Navbar() {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  // The result page has no nav entry of its own — it belongs to whichever
+  // The result page has no nav entry of its own, it belongs to whichever
   // section produced the analysis, so the tab the user came from stays lit.
   const latestMode = useAppStore((s) => s.latest?.mode);
   // The persisted store rehydrates only on the client; deferring to it until
@@ -57,7 +57,7 @@ export function Navbar() {
           : "border-b border-transparent bg-transparent"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-5">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-3">
         <Link href="/" className="shrink-0">
           <Logo />
         </Link>
@@ -71,7 +71,7 @@ export function Navbar() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative rounded-md px-4 py-2 text-sm tracking-wide transition-colors",
+                  "relative rounded-sm px-3 py-2 text-sm tracking-wide transition-colors",
                   active
                     ? "bg-leaf-100 font-semibold text-leaf-900 dark:bg-leaf-800/60 dark:text-leaf-50"
                     : "font-medium text-[var(--fg-muted)] hover:bg-leaf-50 hover:text-[var(--fg)] dark:hover:bg-leaf-800/25"
@@ -90,14 +90,14 @@ export function Navbar() {
           <InstallButton compact className="hidden sm:inline-flex" />
           <Link
             href="/disease"
-            className="hidden xl:inline-flex h-9 items-center rounded-md bg-leaf-700 px-4 text-sm font-medium text-parchment hover:bg-leaf-800 transition-colors dark:bg-leaf-300 dark:text-leaf-900 dark:hover:bg-leaf-200"
+            className="hidden xl:inline-flex h-9 items-center rounded-sm bg-leaf-700 px-3 text-sm font-medium text-parchment hover:bg-leaf-800 transition-colors dark:bg-leaf-300 dark:text-leaf-900 dark:hover:bg-leaf-200"
           >
             {t("nav.start")}
           </Link>
           <LanguageToggle className="hidden sm:inline-flex" />
           <ThemeToggle />
           <button
-            className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--bg-elev)]"
+            className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-sm border border-[var(--border)] bg-[var(--bg-elev)]"
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle navigation"
           >
@@ -119,7 +119,7 @@ export function Navbar() {
             : "max-h-0 overflow-hidden opacity-0"
         )}
       >
-        <div className="flex flex-col px-4 py-4 gap-1">
+        <div className="flex flex-col px-3 py-2.5 gap-1">
           {NAV.map((item) => {
             const active = item.href === activeHref;
             return (
@@ -128,7 +128,7 @@ export function Navbar() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center justify-between rounded-lg px-4 py-3 text-sm",
+                  "flex items-center justify-between rounded px-3 py-2 text-sm",
                   active
                     ? "bg-leaf-100 font-semibold text-leaf-900 dark:bg-leaf-800/60 dark:text-leaf-50"
                     : "font-medium text-[var(--fg-muted)] hover:bg-leaf-50 dark:hover:bg-leaf-800/20"
@@ -141,7 +141,7 @@ export function Navbar() {
               </Link>
             );
           })}
-          <div className="mt-2 flex items-center justify-between border-t border-[var(--border)] pt-3 sm:hidden">
+          <div className="mt-2 flex items-center justify-between border-t border-[var(--border)] pt-2 sm:hidden">
             <span className="text-xs font-semibold tracking-wide text-[var(--fg-muted)]">
               {t("nav.language")}
             </span>

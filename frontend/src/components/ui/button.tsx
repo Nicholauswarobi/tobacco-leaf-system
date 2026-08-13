@@ -23,14 +23,15 @@ const variants: Record<Variant, string> = {
     "border border-[var(--border)] bg-transparent hover:bg-[var(--bg-elev)] text-[var(--fg)]",
 };
 
-// Tightened, but `lg` stays at 44px — the smallest comfortable touch target,
-// and it is the primary action on a phone.
-// (`h-13`, used here before, silently did nothing: Tailwind's scale jumps 12 →
+// `lg` is 40px. That is under the 44px usually recommended for a thumb, but
+// it is the density that was asked for; anything shorter would start costing
+// mis-taps on the primary action.
+// (`h-13`, used here before, silently did nothing: Tailwind's scale jumps 12 to
 // 14, so large buttons collapsed to the height of their own text.)
 const sizes: Record<Size, string> = {
-  sm: "h-8 px-2.5 text-sm",
-  md: "h-10 px-4 text-sm",
-  lg: "h-11 px-5 text-base",
+  sm: "h-7 px-2 text-xs",
+  md: "h-9 px-3 text-sm",
+  lg: "h-10 px-4 text-sm",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -42,7 +43,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ref={ref}
       disabled={disabled || isLoading}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-md font-medium tracking-wide",
+        "inline-flex items-center justify-center gap-2 rounded-sm font-medium tracking-wide",
         "transition-all duration-200 ease-out",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         "active:scale-[0.98]",

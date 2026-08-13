@@ -5,10 +5,10 @@
  *
  * The two phases are genuinely different and are shown differently:
  *
- *   sending  — a real percentage, from XMLHttpRequest's upload events. On
+ *   sending: a real percentage, from XMLHttpRequest's upload events. On
  *              mobile data this is the slow part, and a real number is the
  *              difference between "it is working" and "it has frozen".
- *   working  — the server is thinking. No progress exists to report, so the
+ *   working: the server is thinking. No progress exists to report, so the
  *              bar becomes an indeterminate sweep rather than a fake count-up
  *              that stalls at 90%.
  *
@@ -26,7 +26,7 @@ export type AnalysisPhase = "sending" | "working";
 
 interface Props {
   phase: AnalysisPhase;
-  /** 0–1, meaningful only while `phase` is "sending". */
+  /** 0: 1, meaningful only while `phase` is "sending". */
   uploaded: number;
   mode: "disease" | "quality";
 }
@@ -63,9 +63,9 @@ export function AnalysisProgress({ phase, uploaded, mode }: Props) {
     <div
       role="status"
       aria-live="polite"
-      className="rounded-lg border border-[var(--border)] bg-[var(--bg-elev)] p-3 sm:p-4"
+      className="rounded border border-[var(--border)] bg-[var(--bg-elev)] p-2 sm:p-3"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 shrink-0 animate-spin text-leaf-700 dark:text-leaf-300" />
         <p className="min-w-0 flex-1 text-sm font-medium text-[var(--fg)]">
           {sending ? t("progress.sending") : t("progress.working")}
@@ -78,7 +78,7 @@ export function AnalysisProgress({ phase, uploaded, mode }: Props) {
       </div>
 
       {/* The track. Determinate while bytes are moving, a sweep afterwards. */}
-      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-leaf-100 dark:bg-leaf-900/40">
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-leaf-100 dark:bg-leaf-900/40">
         {sending ? (
           <div
             className="h-full rounded-full bg-leaf-700 transition-[width] duration-200 ease-out dark:bg-leaf-300"
@@ -93,7 +93,7 @@ export function AnalysisProgress({ phase, uploaded, mode }: Props) {
         )}
       </div>
 
-      <ol className="mt-4 space-y-2">
+      <ol className="mt-3 space-y-2">
         {steps.map(({ key, icon: Icon, done, active }) => (
           <li
             key={key}

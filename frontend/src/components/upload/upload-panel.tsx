@@ -42,12 +42,12 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  // Rejection by the Tobacco Verification gate is not an error — the system
+  // Rejection by the Tobacco Verification gate is not an error, the system
   // worked and the image simply is not a leaf. Tracked separately so it can be
   // shown as guidance instead of a red failure banner.
   const [rejection, setRejection] = useState<VerificationResult | null>(null);
   // A real tobacco leaf that belongs in the other section. Separate from
-  // `rejection` because the answer is "switch tabs", not "take a new photo" —
+  // `rejection` because the answer is "switch tabs", not "take a new photo",
   // and the file the user already picked stays valid.
   const [misrouted, setMisrouted] = useState<WrongSectionError | null>(null);
   // Split from `isPredicting` because the two phases need different UI: a real
@@ -59,7 +59,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   const actionRef = useRef<HTMLDivElement>(null);
 
   // On a phone the photo fills the screen, so the progress readout can start
-  // life below the fold — the user taps and appears to get nothing back.
+  // life below the fold: the user taps and appears to get nothing back.
   useEffect(() => {
     if (isPredicting) {
       actionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -103,7 +103,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   const onCameraChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     const f = e.target.files?.[0];
     if (f) acceptFile(f);
-    // Clearing the value lets the same photo be chosen twice in a row —
+    // Clearing the value lets the same photo be chosen twice in a row;
     // otherwise the second selection is identical and `change` never fires.
     e.target.value = "";
   };
@@ -148,7 +148,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
       router.push("/result");
     } catch (e: unknown) {
       if (e instanceof WrongSectionError) {
-        // The leaf is fine — it just belongs in the other analysis.
+        // The leaf is fine: it just belongs in the other analysis.
         setMisrouted(e);
       } else if (e instanceof NotATobaccoLeafError) {
         // Verification stopped the pipeline before any analysis ran.
@@ -164,7 +164,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
           }
         );
       } else {
-        // Whatever the API said, the reader can only act on plain language —
+        // Whatever the API said, the reader can only act on plain language,
         // but swallowing it entirely leaves "the check did not finish" with no
         // way to tell a dropped connection from a rejected request, so the
         // real cause goes to the console for whoever is debugging.
@@ -185,14 +185,14 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         <div
           {...getRootProps()}
           className={cn(
-            "relative rounded-xl border-2 border-dashed transition-all",
+            "relative rounded-md border-2 border-dashed transition-all",
             "flex items-center justify-center",
-            // Sized to its contents now that the buttons sit outside it —
+            // Sized to its contents now that the buttons sit outside it:
             // the old minimum was set when they lived inside, and left a tall
             // empty box behind once they moved.
             previewUrl
               ? "p-2"
-              : "min-h-[180px] sm:min-h-[220px] p-4 sm:p-5",
+              : "min-h-[180px] sm:min-h-[220px] p-3 sm:p-3",
             isDragActive
               ? "border-leaf-700 bg-leaf-50 dark:border-leaf-300 dark:bg-leaf-900/20"
               : "border-[var(--border)] bg-[var(--bg-elev)]"
@@ -206,14 +206,14 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
               <img
                 src={previewUrl}
                 alt="Preview"
-                className="max-h-[34vh] w-full rounded-lg object-contain sm:max-h-[420px]"
+                className="max-h-[34vh] w-full rounded object-contain sm:max-h-[420px]"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   reset();
                 }}
-                className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-md bg-black/60 text-white hover:bg-black/80"
+                className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-sm bg-black/60 text-white hover:bg-black/80"
                 aria-label={t("upload.remove")}
               >
                 <X className="h-4 w-4" />
@@ -225,10 +225,10 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
             </div>
           ) : (
             <div className="text-center max-w-md">
-              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-lg bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
+              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
                 <ImagePlus className="h-6 w-6" />
               </div>
-              <h3 className="mt-4 font-display text-lg sm:text-xl tracking-tight">
+              <h3 className="mt-3 font-display text-lg sm:text-xl tracking-tight">
                 {t("upload.dropTitle")}
               </h3>
               <p className="mt-1.5 text-sm text-[var(--fg-muted)]">
@@ -242,13 +242,13 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
           Both controls live OUTSIDE the dropzone root, and so does the camera
           input. Inside it, `cameraInput.click()` dispatched a click that
           bubbled up to react-dropzone's root handler, which opened the file
-          picker as well — so tapping "Use camera" showed the upload dialog,
+          picker as well, so tapping "Use camera" showed the upload dialog,
           and cancelling it revealed the camera dialog queued behind. Stopping
           propagation on the button could not help: the programmatic click on
           the input is a separate event.
         */}
         {!previewUrl && (
-          <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center">
+          <div className="mt-2 flex flex-col sm:flex-row gap-2 justify-center">
             <Button onClick={open} variant="primary" className="w-full sm:w-auto">
               <ImagePlus className="h-4 w-4" />
               {t("upload.choose")}
@@ -275,7 +275,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
 
         {/* The action, directly under the photo it acts on. */}
         {file && (
-          <div className="mt-3" ref={actionRef}>
+          <div className="mt-2" ref={actionRef}>
             {isPredicting ? (
               <AnalysisProgress phase={phase} uploaded={uploaded} mode={mode} />
             ) : (
@@ -288,7 +288,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                   <Sparkles className="h-4 w-4" />
                   {t("upload.run")}
                 </Button>
-                <p className="mt-3 text-center text-xs text-[var(--fg-muted)]">
+                <p className="mt-2 text-center text-xs text-[var(--fg-muted)]">
                   {t("upload.speed")}
                 </p>
               </>
@@ -299,9 +299,9 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         {misrouted && (
           <div
             role="alert"
-            className="mt-4 rounded-lg border border-sky-300 bg-sky-50 px-4 py-4 text-sm text-sky-900 dark:border-sky-800/50 dark:bg-sky-950/30 dark:text-sky-100"
+            className="mt-3 rounded border border-sky-300 bg-sky-50 px-3 py-2.5 text-sm text-sky-900 dark:border-sky-800/50 dark:bg-sky-950/30 dark:text-sky-100"
           >
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2">
               <Leaf className="mt-0.5 h-5 w-5 shrink-0" />
               <div className="min-w-0">
                 <p className="font-semibold">{t("upload.wrongSectionTitle")}</p>
@@ -312,7 +312,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                 </p>
                 <Button
                   variant="outline"
-                  className="mt-3"
+                  className="mt-2"
                   onClick={() =>
                     router.push(
                       misrouted.suggestedMode === "quality"
@@ -336,9 +336,9 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         {rejection && (
           <div
             role="alert"
-            className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-4 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-100"
+            className="mt-3 rounded border border-amber-300 bg-amber-50 px-3 py-2.5 text-sm text-amber-900 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-100"
           >
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2">
               <Leaf className="mt-0.5 h-5 w-5 shrink-0" />
               <div className="min-w-0">
                 <p className="font-semibold">{rejection.message}</p>
@@ -353,7 +353,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                 <Button
                   onClick={reset}
                   variant="outline"
-                  className="mt-3"
+                  className="mt-2"
                 >
                   {t("upload.tryAnother")}
                 </Button>
@@ -363,7 +363,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         )}
 
         {error && (
-          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
+          <div className="mt-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
             {error}
           </div>
         )}

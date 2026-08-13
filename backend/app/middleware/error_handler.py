@@ -1,4 +1,4 @@
-"""Global exception handlers — return clean JSON errors."""
+"""Global exception handlers: return clean JSON errors."""
 import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse

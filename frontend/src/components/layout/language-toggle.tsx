@@ -20,7 +20,7 @@ export function LanguageToggle({ className }: { className?: string }) {
       role="group"
       aria-label={t("nav.language")}
       className={cn(
-        "inline-flex items-center gap-0.5 rounded-md border border-[var(--border)] bg-[var(--bg-elev)] p-0.5",
+        "inline-flex items-center gap-0.5 rounded-sm border border-[var(--border)] bg-[var(--bg-elev)] p-0.5",
         className
       )}
     >

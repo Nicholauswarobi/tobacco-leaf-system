@@ -109,7 +109,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def mobilenet_rescale() -> tf.keras.Sequential:
-    """Map [0, 255] to [-1, 1] — the range MobileNetV2's ImageNet weights expect.
+    """Map [0, 255] to [-1, 1], the range MobileNetV2's ImageNet weights expect.
 
     data.py::normalize() rescales to [0, 1], which is what the disease and
     quality models use. That is a half-range mismatch against the pretrained

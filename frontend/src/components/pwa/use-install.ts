@@ -6,7 +6,7 @@
  *
  * Chrome, Edge and Samsung Internet fire `beforeinstallprompt`, which hands us
  * an event we can replay later from a real click. Safari on iOS fires nothing
- * and exposes no API at all — installing is a manual trip through the Share
+ * and exposes no API at all: installing is a manual trip through the Share
  * sheet, so there the only honest thing to do is show the instructions.
  *
  * The event arrives once, early, and often before this hook mounts. It is
@@ -29,7 +29,7 @@ export type Platform = "ios" | "android" | "desktop";
 export interface InstallState {
   /** The browser gave us a prompt we can fire from a click. */
   canPrompt: boolean;
-  /** Already running as an installed app — offer nothing. */
+  /** Already running as an installed app: offer nothing. */
   isStandalone: boolean;
   /** Installed during this session. */
   justInstalled: boolean;
@@ -40,8 +40,8 @@ export interface InstallState {
   method: InstallMethod;
   platform: Platform;
   /**
-   * False on plain http over anything but localhost. Service workers — and so
-   * installation — are refused outright there, and no amount of tapping will
+   * False on plain http over anything but localhost. Service workers, and so
+   * installation: are refused outright there, and no amount of tapping will
    * change it, so the UI has to say so.
    */
   isSecureContext: boolean;
@@ -129,7 +129,7 @@ export function useInstall(): InstallState {
   }, []);
 
   // There is no "cannot install" branch on purpose. A button that vanishes
-  // teaches the user nothing — and it vanished exactly when they needed it,
+  // teaches the user nothing, and it vanished exactly when they needed it,
   // since `beforeinstallprompt` never fires in dev or over plain http. When
   // there is no prompt to fire, the UI explains their browser's own route.
   const method: InstallMethod = canPrompt

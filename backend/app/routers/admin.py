@@ -1,4 +1,4 @@
-"""Admin endpoints — gated by a simple API key header."""
+"""Admin endpoints: gated by a simple API key header."""
 from fastapi import APIRouter, Header, HTTPException, status
 
 from app.core.config import settings

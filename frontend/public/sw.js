@@ -2,15 +2,15 @@
  * TobaccoScan service worker.
  *
  * Two jobs: make the app installable, and keep it usable when the phone drops
- * off the network — which in the field is most of the time.
+ * off the network, which in the field is most of the time.
  *
  * What is deliberately NOT cached:
  *
  *   • Anything that is not a GET. A prediction is a POST of a photo; replaying
  *     one from cache would show a farmer last week's diagnosis for this week's
  *     leaf.
- *   • `/api/*` on the backend origin. History, health and stats must be live —
- *     a stale grade or a stale "model loaded" flag is worse than an error.
+ *   • `/api/*` on the backend origin. History, health and stats must be live.
+ *     A stale grade or a stale "model loaded" flag is worse than an error.
  *
  * What is cached: the pages actually visited, the build's static chunks, the
  * icons, and uploaded leaf photos (whose URLs are unique per prediction and
@@ -118,7 +118,7 @@ self.addEventListener("fetch", (event) => {
 
   // Uploaded leaf photos, whether proxied or fetched from the backend origin
   // directly. Their filenames are per-prediction and immutable, so a cache hit
-  // is always correct — this is what lets history and results render offline.
+  // is always correct: this is what lets history and results render offline.
   const isUpload =
     url.pathname.startsWith("/uploads/") ||
     url.pathname.startsWith("/backend/uploads/");
@@ -240,7 +240,7 @@ async function putInCache(cacheName, request, response) {
     const cache = await caches.open(cacheName);
     await cache.put(request, response);
   } catch {
-    /* quota exceeded or an unstorable response — not worth failing over */
+    /* quota exceeded or an unstorable response: not worth failing over */
   }
 }
 

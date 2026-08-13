@@ -26,9 +26,9 @@ export function Badge({ className, tone = "neutral", ...rest }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium",
         // `rounded-full` resolves to a 9999px radius, which on a *single* line
-        // is a pill — but as soon as the text wraps, the box grows tall and
+        // is a pill, but as soon as the text wraps, the box grows tall and
         // that radius turns it into an ellipse. A fixed radius stays a
         // rounded rectangle at any height, so a long label degrades into a
         // chip rather than a blob.

@@ -1,5 +1,5 @@
 """
-Prediction service — orchestrates the disease and quality models,
+Prediction service: orchestrates the disease and quality models,
 builds rich responses with descriptions and recommendations.
 """
 from __future__ import annotations
@@ -38,7 +38,7 @@ from app.utils.leaf_validator import (
     STATE_FRESH,
 )
 
-# Applies only while the verification model is untrained — see
+# Applies only while the verification model is untrained, see
 # _assert_confident_enough below.
 MIN_LEAF_CONFIDENCE: float = 0.65
 
@@ -140,7 +140,7 @@ def _assert_confident_enough(
     Once the trained verification model is loaded it is the sole authority on
     what is and is not tobacco. Second-guessing it here would tell a farmer
     "this is not a tobacco leaf" about a genuine leaf that merely sits between
-    two disease classes — which is a diagnosis problem, not an input problem.
+    two disease classes, which is a diagnosis problem, not an input problem.
     """
     if verification.method != METHOD_COLOR:
         return
@@ -233,12 +233,12 @@ DISEASE_INFO = {
     "Cercospora Leaf Spot": {
         "description": (
             "Caused by Cercospora nicotianae. Small circular spots with "
-            "tan centers and dark borders — 'frog-eye' lesions. Severe "
+            "tan centers and dark borders, called 'frog-eye' lesions. Severe "
             "infections cause premature defoliation."
         ),
         "recommendations": [
             "Rotate crops; avoid planting tobacco on the same field 2 years in a row.",
-            "Apply a copper- or chlorothalonil-based fungicide on a 7–10 day schedule.",
+            "Apply a copper- or chlorothalonil-based fungicide on a 7, 10 day schedule.",
             "Remove crop debris after harvest.",
             "Use resistant cultivars next season if available.",
         ],
@@ -277,7 +277,7 @@ DISEASE_INFO = {
         ),
         "recommendations": [
             "Maintain current irrigation and fertilization schedule.",
-            "Continue routine pest scouting every 7–10 days.",
+            "Continue routine pest scouting every 7: 10 days.",
             "Monitor humidity to prevent fungal onset.",
         ],
         "treatment": {
@@ -316,7 +316,7 @@ QUALITY_INFO = {
             "color, fine texture, and high oil content. Suitable for "
             "premium cigars and export markets."
         ),
-        "market_value": "Highest — premium export pricing",
+        "market_value": "Highest, premium export pricing",
     },
     "Grade B": {
         "description": (
@@ -332,13 +332,13 @@ QUALITY_INFO = {
             "texture, or poor curing. Typically used for low-grade products "
             "or further processing."
         ),
-        "market_value": "Lowest — bulk processing pricing",
+        "market_value": "Lowest, bulk processing pricing",
     },
 }
 
 
 def _lookup_disease(label: str) -> dict:
-    """Safe lookup — never raises KeyError for unknown labels."""
+    """Safe lookup: never raises KeyError for unknown labels."""
     return DISEASE_INFO.get(label, _DISEASE_INFO_FALLBACK)
 
 
@@ -357,7 +357,7 @@ def _to_treatment(info: dict) -> DiseaseTreatment | None:
 
 
 def _lookup_quality(label: str) -> dict:
-    """Safe lookup — never raises KeyError for unknown grade labels."""
+    """Safe lookup: never raises KeyError for unknown grade labels."""
     return QUALITY_INFO.get(label, {
         "description": "Quality grade not recognized.",
         "market_value": "Unknown",
@@ -377,7 +377,7 @@ def predict_disease_only(
 
     Raises NotATobaccoLeafError if verification rejects the image.
     """
-    # Stage 1: Tobacco Verification — the disease model is not touched unless
+    # Stage 1: Tobacco Verification: the disease model is not touched unless
     # this passes.
     verification = _verify(image, verification)
     # Stage 2: right subject for this model? A cured leaf gets sent to Quality.
@@ -434,7 +434,7 @@ def predict_quality_only(
 
     Raises NotATobaccoLeafError if verification rejects the image.
     """
-    # Stage 1: Tobacco Verification — the quality model is not touched unless
+    # Stage 1: Tobacco Verification: the quality model is not touched unless
     # this passes.
     verification = _verify(image, verification)
     # Stage 2: right subject for this model? A fresh leaf gets sent to Disease.
@@ -492,7 +492,7 @@ def predict_full(
 
     Raises NotATobaccoLeafError if verification rejects the image.
     """
-    # Stage 1: Tobacco Verification — neither downstream model is touched
+    # Stage 1: Tobacco Verification: neither downstream model is touched
     # unless this passes.
     verification = _verify(image, verification)
 

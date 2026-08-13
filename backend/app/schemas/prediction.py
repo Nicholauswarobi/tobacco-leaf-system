@@ -1,4 +1,4 @@
-"""Pydantic schemas — request/response shapes for the prediction API."""
+"""Pydantic schemas: request/response shapes for the prediction API."""
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime

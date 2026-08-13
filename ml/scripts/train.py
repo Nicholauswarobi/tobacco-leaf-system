@@ -65,7 +65,7 @@ def wrap_with_preprocessing(
 ) -> tf.keras.Model:
     """Bake augmentation+normalization into the model graph.
 
-    This means the *exported* .h5 file expects raw [0,255] pixel arrays —
+    This means the *exported* .h5 file expects raw [0,255] pixel arrays
     matching what the FastAPI service feeds it. (Augmentation is a no-op
     at inference time.)
     """

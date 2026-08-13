@@ -1,4 +1,4 @@
-# TobaccoScan — Tobacco Leaf Disease Detection & Quality Grading
+# TobaccoScan: Tobacco Leaf Disease Detection & Quality Grading
 
 A full-stack, production-grade system that uses deep learning to detect leaf diseases and classify quality grades for tobacco leaves from a single image.
 
@@ -11,9 +11,9 @@ A full-stack, production-grade system that uses deep learning to detect leaf dis
 
 ## ✨ What it does
 
-- **Tobacco verification** — every upload is checked as `Tobacco` / `Not Tobacco` *before* any analysis runs
-- **Disease detection** — `Healthy`, `Alternaria Leaf Spot`, `Cercospora Leaf Spot`, `Tobacco Mosaic Virus`
-- **Quality grading** — `Grade A`, `Grade B`, `Grade C`
+- **Tobacco verification**: every upload is checked as `Tobacco` / `Not Tobacco` *before* any analysis runs
+- **Disease detection**: `Healthy`, `Alternaria Leaf Spot`, `Cercospora Leaf Spot`, `Tobacco Mosaic Virus`
+- **Quality grading**: `Grade A`, `Grade B`, `Grade C`
 - **Confidence scores** for every class, with farmer-friendly recommendations
 - **History** with SQLite persistence and CSV export
 - **Dashboard** with charts (recharts) showing disease pressure and grade mix
@@ -33,7 +33,7 @@ tobacco-leaf-system/
 │   │   ├── store/         Zustand state
 │   │   └── types/         Shared TS types
 │   ├── public/            Static assets, PWA manifest, sw.js, icons/
-│   ├── scripts/           generate_icons.py — regenerates the app icons
+│   ├── scripts/           generate_icons.py: regenerates the app icons
 │   └── Dockerfile
 ├── backend/               FastAPI server
 │   ├── app/
@@ -62,7 +62,7 @@ tobacco-leaf-system/
 
 ## 🚀 Quick start
 
-### Option A — Docker (recommended)
+### Option A: Docker (recommended)
 
 ```bash
 # 1. Clone and enter
@@ -70,7 +70,7 @@ git clone <your-repo> tobacco-leaf-system
 cd tobacco-leaf-system
 
 # 2. (Optional) Drop trained .keras models into backend/saved_models/
-#    If absent, the API runs in stub mode — perfect for frontend dev.
+#    If absent, the API runs in stub mode, perfect for frontend dev.
 
 # 3. Boot the stack
 docker compose up --build
@@ -79,7 +79,7 @@ docker compose up --build
 # Backend:  http://localhost:8000  (Swagger at /docs)
 ```
 
-### Option B — Local dev (three terminals)
+### Option B: Local dev (three terminals)
 
 **1. Backend**
 
@@ -119,7 +119,7 @@ See [Training](#-training-the-models) below.
 
 The disease and quality models are **closed-world classifiers**: trained only
 on tobacco leaves, they have no "none of the above" option. Hand one a photo of
-maize, a phone, or a person and it does not fail — it confidently returns a
+maize, a phone, or a person and it does not fail, it confidently returns a
 tobacco disease class. A confidence threshold cannot fix this, because a model
 is frequently confident *and* wrong on inputs it has never seen.
 
@@ -149,8 +149,8 @@ which tier is live via `GET /api/health` → `verification_method`.
 
 **Every image in `ml/data/raw/disease/` is perfectly greyscale** (R == G == B
 exactly, across all 6,904 files). Open Images negatives are full colour. Train
-a naive binary classifier on that pairing and it learns exactly one rule —
-*"saturated ⇒ not tobacco"* — which fails in both directions in the real world:
+a naive binary classifier on that pairing and it learns exactly one rule,
+*"saturated ⇒ not tobacco"*, which fails in both directions in the real world:
 a greyscale photo of a car passes, and an ordinary colour photo of a tobacco
 leaf is rejected.
 
@@ -163,7 +163,7 @@ Once your positives include real colour photographs, retrain with
 
 > The same greyscale property means the colour pre-screen scores 0% leaf
 > coverage on your own dataset. It now **abstains** on greyscale images rather
-> than rejecting them — a heuristic with no signal should not veto.
+> than rejecting them: a heuristic with no signal should not veto.
 
 ### Build and train it
 
@@ -183,7 +183,7 @@ python scripts/train_verification.py --epochs 20
 # 4. Deploy
 cp saved_models/tobacco_verification_model.keras ../backend/saved_models/
 cp saved_models/verification_metadata.json       ../backend/saved_models/
-# restart the backend — it loads the model on startup
+# restart the backend: it loads the model on startup
 ```
 
 ### ⚠️ What Open Images cannot give you
@@ -191,7 +191,7 @@ cp saved_models/verification_metadata.json       ../backend/saved_models/
 Verified against the live V7 catalogue (601 classes): **there is no `Maize`,
 `Rice`, `Cassava`, `Common bean` or `Grass`.** Those crop leaves are exactly
 the images users mistakenly submit to a tobacco classifier, and exactly the
-hardest negatives for it to reject. No `--per-class` value fixes this — the
+hardest negatives for it to reject. No `--per-class` value fixes this, the
 data is not there.
 
 Cover the gap with a leaf dataset. [PlantVillage on
@@ -202,11 +202,11 @@ tomato, potato and pepper foliage:
 python scripts/build_verification_dataset.py --extra-negatives path/to/plantvillage
 ```
 
-Do this **before** training rather than after — retraining costs another hour.
+Do this **before** training rather than after, retraining costs another hour.
 
 ### How the negative class is balanced
 
-Sources differ wildly in size — PlantVillage is ~54,000 images, an Open Images
+Sources differ wildly in size: PlantVillage is ~54,000 images, an Open Images
 pull is ~4,700. Sampling that pool uniformly would make the negative class
 ~92% crop leaves and leave roughly 300 images to represent every person,
 phone, car and desk, producing a gate that rejects foliage and waves a photo
@@ -217,7 +217,7 @@ class folder contributes in equal turns until its own supply runs out. Split
 directories (`train/`, `val/`, `test/`) are collapsed first, so PlantVillage's
 38 classes duplicated across two splits count once each rather than twice.
 
-The result is printed every run — check it:
+The result is printed every run: check it:
 
 ```
 Not_Tobacco composition (staged this run):
@@ -234,7 +234,7 @@ python scripts/download_not_tobacco.py --add-classes Tractor --per-class 300 --a
 python scripts/build_verification_dataset.py --append --extra-negatives ./new_photos
 ```
 
-Names are resolved against the live catalogue in four passes — exact,
+Names are resolved against the live catalogue in four passes, exact,
 case-insensitive, whole-word containment (`Sunflower` → `Common sunflower`),
 then a deliberately strict fuzzy match. Anything unresolvable is reported and
 skipped rather than guessed at: at a looser cutoff, `Rice` matched `Dice` and
@@ -248,7 +248,7 @@ through produces a confident, wrong diagnosis. Training reflects that
 asymmetry: it sweeps thresholds, requires a floor on the share of non-tobacco
 caught (`--min-reject-recall`, default 0.95), and maximises tobacco F1 subject
 to it. The chosen value lands in `verification_metadata.json`, which the
-backend reads on startup — so no tuned number is hard-coded in the service.
+backend reads on startup, so no tuned number is hard-coded in the service.
 
 If no threshold can hit the target, training says so loudly instead of
 shipping a gate that does not work.
@@ -257,21 +257,21 @@ shipping a gate that does not work.
 
 The system stays usable: verification falls back to the colour pre-screen, and
 the legacy low-confidence check on the disease model stays active as a second
-net. Once the real model loads, it becomes the sole authority — second-guessing
+net. Once the real model loads, it becomes the sole authority, second-guessing
 it would tell a farmer "this is not a tobacco leaf" about a genuine leaf that
 merely sits between two disease classes.
 
 Relevant settings (`backend/.env`):
 
 ```ini
-VERIFICATION_ENABLED=true          # false disables the gate entirely — debugging only
+VERIFICATION_ENABLED=true          # false disables the gate entirely, debugging only
 VERIFICATION_THRESHOLD=0.5         # overridden by verification_metadata.json
 VERIFICATION_COLOR_FALLBACK=true   # use the HSV pre-screen while untrained
 ```
 
 ## 🧠 Training the models
 
-The ML pipeline is in `ml/`. Two models are trained independently — one for disease, one for quality — both built on MobileNetV2 transfer learning by default.
+The ML pipeline is in `ml/`. Two models are trained independently, one for disease, one for quality, both built on MobileNetV2 transfer learning by default.
 
 ### 1. Prepare data
 
@@ -332,7 +332,7 @@ python -m scripts.quality_dataset.build --target 10000  # ~1 hour, ~7 GB
 ```
 
 Images come from Harvard Dataverse [`doi:10.7910/DVN/TTPLFT`](https://doi.org/10.7910/DVN/TTPLFT)
-(CC0) — 49,778 photographs of flue-cured leaves shot on Tanzanian grading
+(CC0): 49,778 photographs of flue-cured leaves shot on Tanzanian grading
 tables. Grades are derived from the quality digit in each leaf's official
 Tanzanian grade code, not guessed. The build writes
 `ml/data/tobacco_quality_dataset/` with `Grade_A/`, `Grade_B/`, `Grade_C/`,
@@ -341,7 +341,7 @@ folder's `README.md` for the mapping rationale and caveats.
 
 ### 2. Install ML deps & train
 
-> **Retraining runbook: [`ml/TRAINING.md`](ml/TRAINING.md)** — step-by-step
+> **Retraining runbook: [`ml/TRAINING.md`](ml/TRAINING.md)**: step-by-step
 > commands for the verification gate and the quality model, in the order they
 > have to be run, with the checks that catch a silently broken result.
 
@@ -406,8 +406,8 @@ browser chrome. The **Install app** button appears in three places: the header
 on desktop, inside the ☰ menu on a phone, and in a one-time banner at the
 bottom of the screen.
 
-- **Android / Chrome / Edge** — tap **Install app**, then confirm.
-- **iPhone / Safari** — tap **Install app** for the steps: Share → *Add to Home
+- **Android / Chrome / Edge**: tap **Install app**, then confirm.
+- **iPhone / Safari**: tap **Install app** for the steps: Share → *Add to Home
   Screen* → *Add*. Safari has no install API, so this part is manual on every
   iOS site.
 
@@ -419,8 +419,8 @@ precondition. If the page is not on https, the steps say so directly.
 
 ### ⚠️ It will not install over plain http
 
-This is the one thing that trips people up. Service workers — and therefore
-installability — require a **secure context**: `https://`, or `localhost`
+This is the one thing that trips people up. Service workers, and therefore
+installability: require a **secure context**: `https://`, or `localhost`
 exactly. Opening `http://192.168.1.42:3000` on your phone across the LAN serves
 the app fine but silently refuses to register the worker, so no install button
 ever appears. Nothing is broken; the origin simply is not trusted.
@@ -435,7 +435,7 @@ cd frontend && npm run build && npm start
 ngrok http 3000            # or: cloudflared tunnel --url http://localhost:3000
 ```
 
-Open the https URL on your phone. That is the whole procedure — no second
+Open the https URL on your phone. That is the whole procedure, no second
 tunnel, no `NEXT_PUBLIC_API_URL`, and no CORS changes.
 
 The backend does not need its own tunnel because **the browser never talks to
@@ -449,7 +449,7 @@ matters.
 HTTPS, and the install works from the real URL with nothing extra.
 
 **3. Test on desktop Chrome.** `npm run build && npm start`, open
-`http://localhost:3000` — localhost counts as secure. Install from the icon in
+`http://localhost:3000`: localhost counts as secure. Install from the icon in
 the address bar. DevTools → *Application* → *Manifest* runs the same checks the
 phone does.
 
@@ -463,12 +463,12 @@ Only what can honestly work offline does:
 
 | Works offline | Needs a connection |
 | ------------- | ------------------ |
-| Pages already visited on that phone | Checking a leaf — the photo is analysed on the server |
+| Pages already visited on that phone | Checking a leaf, the photo is analysed on the server |
 | Leaf photos from past checks | History, dashboard and admin, which read live from the API |
 | The app shell, icons and fonts | |
 
 A page never opened on that phone shows a plain offline screen rather than a
-broken one. Predictions are POSTs and are never cached — replaying a cached
+broken one. Predictions are POSTs and are never cached, replaying a cached
 diagnosis would show a farmer last week's answer for this week's leaf.
 
 ### Regenerating the icons
@@ -496,7 +496,7 @@ phone ──https──▶ https://x.ngrok-free.app/backend/api/predict/disease
 ```
 
 The proxy destination is `BACKEND_ORIGIN` (default `http://localhost:8000`),
-resolved in the Next.js process — **not** in the browser.
+resolved in the Next.js process: **not** in the browser.
 
 ### Why not just call `http://localhost:8000` from the browser?
 
@@ -506,11 +506,11 @@ phone, for two independent reasons:
 1. **`localhost` on a phone means the phone.** It has no FastAPI on port 8000,
    so the request goes nowhere.
 2. **An https page cannot call an http address.** The browser blocks it as
-   mixed content before a packet leaves the device — so tunnelling the backend
+   mixed content before a packet leaves the device, so tunnelling the backend
    over http does not help either.
 
 Both surface as a `fetch` that simply rejects, which the UI reports as *"The
-check did not finish. Please try again."* — the same message it shows for a
+check did not finish. Please try again."*, the same message it shows for a
 genuinely dropped connection. If you see that message, open DevTools; the real
 error is logged to the console.
 
@@ -520,7 +520,7 @@ origin.
 
 ### When to set `NEXT_PUBLIC_API_URL`
 
-Only to bypass the proxy and have the browser call a backend **directly** —
+Only to bypass the proxy and have the browser call a backend **directly**:
 the split deployment where the frontend is on Vercel and the backend is
 somewhere else. It must be an address the *phone* can reach, and https if the
 page is https. Setting it to `http://localhost:8000` re-creates exactly the
@@ -535,7 +535,7 @@ failure above, which is why it now ships commented out in
 - **TensorFlow / Keras** loads two `.keras` models on startup. If they're missing, a deterministic **stub predictor** kicks in so the frontend stays usable.
 - **OpenCV / Pillow** handle preprocessing (resize → normalize → batch).
 - **SQLite** persists history; swap to PostgreSQL by updating `history_service.py`.
-- **CORS** is open to `localhost:3000` by default — change in `.env`.
+- **CORS** is open to `localhost:3000` by default, change in `.env`.
 
 ### Frontend
 - **Next.js 15 App Router** with server and client components properly split.
@@ -547,7 +547,7 @@ failure above, which is why it now ships commented out in
 - **Framer Motion** for the result page reveal animations.
 - **Recharts** for dashboard visualizations.
 - **next-themes** for dark/light/system mode.
-- **Installable PWA** — manifest, icons, and a service worker (`public/sw.js`)
+- **Installable PWA**: manifest, icons, and a service worker (`public/sw.js`)
   that caches the app shell and visited pages but never the API. See
   [Installing on a phone](#-installing-on-a-phone-pwa).
 
@@ -668,7 +668,7 @@ ADMIN_API_KEY=change-me-in-production
 Both are optional; the defaults work for local development *and* for ngrok.
 
 ```ini
-# Where the Next.js server forwards /backend/* — resolved on your machine.
+# Where the Next.js server forwards /backend/*: resolved on your machine.
 BACKEND_ORIGIN=http://localhost:8000
 
 # Leave unset unless the browser must call the backend directly (see
@@ -679,7 +679,7 @@ BACKEND_ORIGIN=http://localhost:8000
 ## 🧪 Testing
 
 ```bash
-# Backend smoke tests + verification pipeline (stub predictor — no .keras needed)
+# Backend smoke tests + verification pipeline (stub predictor, no .keras needed)
 cd backend
 pytest -v
 
@@ -698,7 +698,7 @@ npm run type-check
 - Build the backend image from `backend/Dockerfile`.
 - Build the frontend image from `frontend/Dockerfile`.
 - Set `BACKEND_ORIGIN` on the frontend to the backend's address, and keep
-  `NEXT_PUBLIC_API_URL` unset — the proxy then works with no CORS setup at all.
+  `NEXT_PUBLIC_API_URL` unset: the proxy then works with no CORS setup at all.
 - Mount a persistent volume on the backend for `saved_models/` and `uploads/`.
 
 ### Vercel + a separate backend
@@ -730,7 +730,7 @@ npm run type-check
 - [x] Zustand state, light/dark mode, responsive mobile-first design
 - [x] Confidence visualizations (bars), recharts dashboard
 - [x] CSV export, JSON export per prediction, share API
-- [x] Installable PWA — manifest, maskable icons, service worker, offline page
+- [x] Installable PWA: manifest, maskable icons, service worker, offline page
 - [x] In-app install button (Chromium prompt + iOS Share-sheet instructions)
 - [x] SEO metadata
 - [x] Dockerfiles + docker-compose
@@ -757,4 +757,4 @@ git push origin <branch>
 
 ## 🤝 License
 
-MIT — use it, adapt it, ship it. Built for tobacco growers and ag-tech teams.
+MIT: use it, adapt it, ship it. Built for tobacco growers and ag-tech teams.

@@ -3,7 +3,7 @@
 /**
  * Module-level capture of the browser's install prompt.
  *
- * `beforeinstallprompt` fires once, very early — typically before any React
+ * `beforeinstallprompt` fires once, very early, typically before any React
  * component that wants to render an install button has mounted. Listening for
  * it inside that component therefore misses it on most page loads. So the
  * event is caught here, held, and re-announced as a custom event that late
@@ -38,7 +38,7 @@ export function clearDeferredPrompt(): void {
 }
 
 /**
- * Start listening. Safe to call repeatedly — only the first call binds.
+ * Start listening. Safe to call repeatedly: only the first call binds.
  */
 export function startInstallCapture(): void {
   if (listening || typeof window === "undefined") return;

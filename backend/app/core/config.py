@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
 
-    # CORS — comma-separated list in env, parsed into a Python list.
+    # CORS: comma-separated list in env, parsed into a Python list.
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     DISEASE_MODEL_PATH: str = "saved_models/tobacco_disease_model.keras"
     QUALITY_MODEL_PATH: str = "saved_models/tobacco_quality_model.keras"
     VERIFICATION_MODEL_PATH: str = "saved_models/tobacco_verification_model.keras"
-    # Written by ml/scripts/train_verification.py — carries the class order and
+    # Written by ml/scripts/train_verification.py: carries the class order and
     # the calibrated threshold so this service never hard-codes a tuned number.
     VERIFICATION_METADATA_PATH: str = "saved_models/verification_metadata.json"
 
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # In-memory history (or SQLite path if you want to persist).
     HISTORY_DB: str = "history.db"
 
-    # Auth (very simple token for the admin route — replace in production).
+    # Auth (very simple token for the admin route, replace in production).
     ADMIN_API_KEY: str = "change-me-in-production"
 
     class Config:

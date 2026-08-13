@@ -1,18 +1,18 @@
 /**
- * API client — talks to the FastAPI backend.
+ * API client: talks to the FastAPI backend.
  *
  * By default every call goes to `/backend/*` on **this same origin**, which
  * `next.config.mjs` proxies to the FastAPI server. That indirection is what
  * makes the app work from a phone.
  *
  * Calling `http://localhost:8000` directly only ever works on the machine
- * running the backend. Open the site from a phone — over ngrok, a tunnel, or
- * the LAN — and `localhost` means *the phone*, so the request goes nowhere.
+ * running the backend. Open the site from a phone, over ngrok, a tunnel, or
+ * the LAN, and `localhost` means *the phone*, so the request goes nowhere.
  * Worse, a page served over https cannot call an http address at all: the
  * browser blocks it as mixed content before a packet is sent. Both failures
  * surface identically, as a fetch that simply rejects.
  *
- * Going through the same origin sidesteps all of it — no second tunnel, no
+ * Going through the same origin sidesteps all of it, no second tunnel, no
  * mixed content, and no CORS, since the browser sees only one origin.
  *
  * Set NEXT_PUBLIC_API_URL to an absolute URL to bypass the proxy and call a
@@ -50,7 +50,7 @@ export interface RoutingHint {
 /**
  * Thrown when the Tobacco Verification Model rejects an upload.
  *
- * A distinct type because this is not a failure — the system worked correctly
+ * A distinct type because this is not a failure, the system worked correctly
  * and the image simply is not a tobacco leaf. The UI should say so calmly
  * rather than showing a red error.
  */
@@ -85,14 +85,14 @@ export class WrongSectionError extends Error {
   }
 }
 
-/** Progress of the photo travelling to the server, 0–1. */
+/** Progress of the photo travelling to the server, 0, 1. */
 export type UploadProgress = (fraction: number) => void;
 
 /**
  * POST a file and report real upload progress.
  *
  * `fetch` cannot report how much of a request body has been sent, and on a
- * phone over mobile data the upload is the slow part — several seconds for a
+ * phone over mobile data the upload is the slow part, several seconds for a
  * 3 MB photo. XMLHttpRequest is the only API that exposes it, so it is used
  * here rather than showing a spinner that tells the user nothing.
  *
@@ -162,7 +162,7 @@ async function handle<T>(res: Response): Promise<T> {
         const where = Array.isArray(first?.loc) ? first.loc.join(".") : "";
         message = [message, [where, first?.msg].filter(Boolean).join(": ")]
           .filter(Boolean)
-          .join(" — ");
+          .join(": ");
       }
       if (body.code === NOT_A_TOBACCO_LEAF) {
         throw new NotATobaccoLeafError(message, body.verification);
@@ -173,7 +173,7 @@ async function handle<T>(res: Response): Promise<T> {
     } catch (e) {
       if (e instanceof NotATobaccoLeafError) throw e;
       if (e instanceof WrongSectionError) throw e;
-      /* non-JSON error body — fall through to the generic error */
+      /* non-JSON error body: fall through to the generic error */
     }
     throw new Error(message);
   }

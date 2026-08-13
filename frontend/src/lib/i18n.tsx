@@ -54,7 +54,7 @@ const EN = {
   "home.title1": "Read the leaf.",
   "home.title2": "Know the harvest.",
   "home.lead":
-    "Take a photo of a tobacco leaf and TobaccoScan tells you whether it is sick, what to spray, and what grade it will fetch — in seconds, on your phone.",
+    "Take a photo of a tobacco leaf and TobaccoScan tells you whether it is sick, what to spray, and what grade it will fetch, in seconds, on your phone.",
   "home.ctaDisease": "Check for disease",
   "home.ctaQuality": "Check quality grade",
   "home.statDiseases": "Diseases",
@@ -153,7 +153,7 @@ const EN = {
 
   // ── Treatment block ──
   "tx.title": "What to do",
-  "tx.medicine": "Medicine — choose one",
+  "tx.medicine": "Medicine: choose one",
   "tx.treatNow": "Treat now",
   "tx.noTreatment": "No medicine needed",
   "tx.confirmFirst": "Check first",
@@ -284,7 +284,7 @@ const EN = {
   "offline.title": "You are offline",
   "offline.body":
     "This page has not been opened on this phone before, so there is no saved copy to show. Pages you have already visited still work without a network.",
-  "offline.backOnline": "You are back online — try again.",
+  "offline.backOnline": "You are back online. Try again.",
   "offline.viewSaved": "Open saved checks",
   "offline.note":
     "Checking a leaf needs a connection, because the photo is analysed on the server.",
@@ -320,7 +320,7 @@ const SW: Record<TKey, string> = {
   "home.title1": "Soma jani.",
   "home.title2": "Tambua mavuno.",
   "home.lead":
-    "Piga picha ya jani la tumbaku na TobaccoScan itakuambia kama lina ugonjwa, dawa ya kunyunyiza, na daraja litakalopata — ndani ya sekunde, kwa simu yako.",
+    "Piga picha ya jani la tumbaku na TobaccoScan itakuambia kama lina ugonjwa, dawa ya kunyunyiza, na daraja litakalopata, ndani ya sekunde, kwa simu yako.",
   "home.ctaDisease": "Angalia ugonjwa",
   "home.ctaQuality": "Angalia daraja la ubora",
   "home.statDiseases": "Magonjwa",
@@ -419,7 +419,7 @@ const SW: Record<TKey, string> = {
 
   // ── Matibabu ──
   "tx.title": "Cha kufanya",
-  "tx.medicine": "Dawa — chagua moja",
+  "tx.medicine": "Dawa: chagua moja",
   "tx.treatNow": "Tibu sasa",
   "tx.noTreatment": "Hakuna dawa inayohitajika",
   "tx.confirmFirst": "Thibitisha kwanza",
@@ -551,7 +551,7 @@ const SW: Record<TKey, string> = {
   "offline.title": "Huna mtandao",
   "offline.body":
     "Ukurasa huu haujafunguliwa kwenye simu hii awali, hivyo hakuna nakala iliyohifadhiwa ya kuonyesha. Kurasa ulizokwisha kufungua bado zinafanya kazi bila mtandao.",
-  "offline.backOnline": "Mtandao umerudi — jaribu tena.",
+  "offline.backOnline": "Mtandao umerudi. Jaribu tena.",
   "offline.viewSaved": "Fungua upimaji uliohifadhiwa",
   "offline.note":
     "Kupima jani kunahitaji mtandao, kwa sababu picha huchambuliwa kwenye seva.",

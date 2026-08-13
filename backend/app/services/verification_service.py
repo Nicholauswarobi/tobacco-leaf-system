@@ -1,11 +1,11 @@
 """
-Tobacco Verification Service — the gate that runs before every other model.
+Tobacco Verification Service: the gate that runs before every other model.
 
 WHY THIS EXISTS
 ---------------
 The disease and quality models are closed-world classifiers. Trained only on
 tobacco leaves, they have no "none of the above" option, so a photo of maize,
-a phone or a person is forced into a tobacco class — confidently and wrongly.
+a phone or a person is forced into a tobacco class, confidently and wrongly.
 A confidence threshold cannot fix that, because the model is often confident
 *and* wrong on inputs it has never seen.
 
@@ -23,7 +23,7 @@ Tier 1  Tobacco Verification Model (ml/scripts/train_verification.py)
 Tier 2  HSV colour pre-screen (app/utils/leaf_validator.py)
         Used only when the trained model is missing, so a fresh checkout is
         no worse than it was before this pipeline existed. It is a heuristic,
-        not a classifier — it catches blue skies and red cars, not maize.
+        not a classifier: it catches blue skies and red cars, not maize.
 
 Both tiers return the same VerificationOutcome, so callers never branch on
 which one ran.
@@ -114,7 +114,7 @@ class VerificationOutcome:
 
     is_tobacco: bool
     label: str
-    # Confidence in the decision that was made — P(Tobacco) when accepted,
+    # Confidence in the decision that was made, P(Tobacco) when accepted,
     # P(Not Tobacco) when rejected. Always "how sure are we about this verdict".
     confidence: float
     message: str
@@ -164,7 +164,7 @@ class VerificationService:
         started = time.perf_counter()
 
         if not settings.VERIFICATION_ENABLED:
-            logger.warning("Verification is disabled — image accepted unchecked.")
+            logger.warning("Verification is disabled: image accepted unchecked.")
             outcome = VerificationOutcome(
                 is_tobacco=True,
                 label="Tobacco",
@@ -258,7 +258,7 @@ class VerificationService:
             # configuration in which maize reaches the disease model.
             logger.warning(
                 "Verification model missing and VERIFICATION_COLOR_FALLBACK=false "
-                "— image accepted without any check."
+                ": image accepted without any check."
             )
             return VerificationOutcome(
                 is_tobacco=True,
@@ -274,7 +274,7 @@ class VerificationService:
             )
 
         # The heuristic reads hue and saturation. A grayscale image has neither,
-        # so it scores 0% leaf coverage and would be rejected outright — which
+        # so it scores 0% leaf coverage and would be rejected outright, which
         # is wrong: it means "cannot tell", not "not a leaf". Abstain instead,
         # and let the downstream confidence net decide.
         if is_effectively_grayscale(image):
@@ -300,7 +300,7 @@ class VerificationService:
 
         if ok:
             detail = (
-                "Colour pre-screen only — the verification model is not loaded, "
+                "Colour pre-screen only: the verification model is not loaded, "
                 "so this image was accepted on colour distribution alone."
             )
         else:
