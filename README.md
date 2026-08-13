@@ -427,27 +427,23 @@ ever appears. Nothing is broken; the origin simply is not trusted.
 
 Three ways to get a real install on a phone:
 
-**1. A quick HTTPS tunnel (fastest for a demo).** Tunnel *both* services — an
-https page cannot call an http API, the browser blocks it as mixed content:
-
-```bash
-cloudflared tunnel --url http://localhost:3000   # → https://<random>.trycloudflare.com
-cloudflared tunnel --url http://localhost:8000   # → https://<other>.trycloudflare.com
-```
-
-Then point the frontend at the tunnelled backend and let the backend accept it:
-
-```ini
-# frontend/.env.local          — rebuild after changing, it is baked in at build time
-NEXT_PUBLIC_API_URL=https://<other>.trycloudflare.com
-
-# backend/.env
-CORS_ORIGINS=["https://<random>.trycloudflare.com"]
-```
+**1. A quick HTTPS tunnel (fastest for a demo).** One tunnel, in front of the
+frontend only:
 
 ```bash
 cd frontend && npm run build && npm start
+ngrok http 3000            # or: cloudflared tunnel --url http://localhost:3000
 ```
+
+Open the https URL on your phone. That is the whole procedure — no second
+tunnel, no `NEXT_PUBLIC_API_URL`, and no CORS changes.
+
+The backend does not need its own tunnel because **the browser never talks to
+it directly**. API calls go to `/backend/*` on the same origin as the page, and
+the Next.js server forwards them to FastAPI (see `rewrites` in
+`next.config.mjs`). See [How the frontend reaches the
+backend](#how-the-frontend-reaches-the-backend) for why that indirection
+matters.
 
 **2. Deploy it.** Any of the options under [Deployment](#-deployment) gives you
 HTTPS, and the install works from the real URL with nothing extra.
@@ -487,6 +483,49 @@ python frontend/scripts/generate_icons.py
 
 That writes every size, including the separate **maskable** variants Android
 crops to a circle or squircle.
+
+## How the frontend reaches the backend
+
+The browser calls **`/backend/*` on whatever origin served the page**, and the
+Next.js server proxies that to FastAPI:
+
+```
+phone ──https──▶ https://x.ngrok-free.app/backend/api/predict/disease
+                             │  (Next.js server, on your machine)
+                             └──http──▶ http://localhost:8000/api/predict/disease
+```
+
+The proxy destination is `BACKEND_ORIGIN` (default `http://localhost:8000`),
+resolved in the Next.js process — **not** in the browser.
+
+### Why not just call `http://localhost:8000` from the browser?
+
+Because it only works on the machine running the backend, and fails on every
+phone, for two independent reasons:
+
+1. **`localhost` on a phone means the phone.** It has no FastAPI on port 8000,
+   so the request goes nowhere.
+2. **An https page cannot call an http address.** The browser blocks it as
+   mixed content before a packet leaves the device — so tunnelling the backend
+   over http does not help either.
+
+Both surface as a `fetch` that simply rejects, which the UI reports as *"The
+check did not finish. Please try again."* — the same message it shows for a
+genuinely dropped connection. If you see that message, open DevTools; the real
+error is logged to the console.
+
+Going through the same origin removes all of it at once: no second tunnel, no
+mixed content, and no CORS preflight, because the browser only ever sees one
+origin.
+
+### When to set `NEXT_PUBLIC_API_URL`
+
+Only to bypass the proxy and have the browser call a backend **directly** —
+the split deployment where the frontend is on Vercel and the backend is
+somewhere else. It must be an address the *phone* can reach, and https if the
+page is https. Setting it to `http://localhost:8000` re-creates exactly the
+failure above, which is why it now ships commented out in
+`.env.local.example`.
 
 ## 🛠️ Architecture notes
 
@@ -626,8 +665,15 @@ ADMIN_API_KEY=change-me-in-production
 
 ### Frontend (`frontend/.env.local`)
 
+Both are optional; the defaults work for local development *and* for ngrok.
+
 ```ini
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# Where the Next.js server forwards /backend/* — resolved on your machine.
+BACKEND_ORIGIN=http://localhost:8000
+
+# Leave unset unless the browser must call the backend directly (see
+# "How the frontend reaches the backend"). Never point it at localhost.
+# NEXT_PUBLIC_API_URL=https://api.your-domain.com
 ```
 
 ## 🧪 Testing
@@ -651,13 +697,18 @@ npm run type-check
 ### Render / Railway / Fly.io
 - Build the backend image from `backend/Dockerfile`.
 - Build the frontend image from `frontend/Dockerfile`.
-- Set `NEXT_PUBLIC_API_URL` to your backend's public URL.
+- Set `BACKEND_ORIGIN` on the frontend to the backend's address, and keep
+  `NEXT_PUBLIC_API_URL` unset — the proxy then works with no CORS setup at all.
 - Mount a persistent volume on the backend for `saved_models/` and `uploads/`.
 
 ### Vercel + a separate backend
-- Frontend: import the `frontend/` directory into Vercel; set `NEXT_PUBLIC_API_URL`.
+- Frontend: import the `frontend/` directory into Vercel.
 - Backend: deploy to Railway / Fly.io / Cloud Run.
-- Update `CORS_ORIGINS` on the backend to include your Vercel URL.
+- Then pick one:
+  - **Proxy (simplest):** set `BACKEND_ORIGIN` to the backend URL. No CORS
+    config needed, since the browser only sees the Vercel origin.
+  - **Direct:** set `NEXT_PUBLIC_API_URL` to the backend's **public https**
+    URL, and add your Vercel URL to `CORS_ORIGINS` on the backend.
 
 ### Self-hosted
 - `docker compose up -d` on any VPS with Docker.

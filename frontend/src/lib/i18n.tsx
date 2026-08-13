@@ -249,6 +249,14 @@ const EN = {
   "footer.learn": "Learn",
   "footer.rights": "Built for the field.",
 
+  // ── Progress while a leaf is being checked ──
+  "progress.sending": "Sending your photo…",
+  "progress.working": "Checking the leaf…",
+  "progress.stepSend": "Send the photo",
+  "progress.stepVerify": "Confirm it is a tobacco leaf",
+  "progress.stepDisease": "Look for disease",
+  "progress.stepGrade": "Give it a grade",
+
   // ── Install / app ──
   "install.button": "Install app",
   "install.bannerTitle": "Put TobaccoScan on your phone",
@@ -506,6 +514,14 @@ const SW: Record<TKey, string> = {
   "footer.use": "Tumia",
   "footer.learn": "Jifunze",
   "footer.rights": "Imetengenezwa kwa ajili ya shambani.",
+
+  // ── Maendeleo wakati jani linapimwa ──
+  "progress.sending": "Inatuma picha yako…",
+  "progress.working": "Inapima jani…",
+  "progress.stepSend": "Tuma picha",
+  "progress.stepVerify": "Thibitisha ni jani la tumbaku",
+  "progress.stepDisease": "Tafuta ugonjwa",
+  "progress.stepGrade": "Ipe daraja",
 
   // ── Kusakinisha programu ──
   "install.button": "Sakinisha programu",

@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDropzone } from "react-dropzone";
 import {
   Camera,
   ImagePlus,
   X,
-  Loader2,
   Sparkles,
   CheckCircle2,
   Leaf,
@@ -16,9 +15,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { api, NotATobaccoLeafError, WrongSectionError } from "@/lib/api";
 import { useAppStore } from "@/store/app-store";
-import { useI18n, type TKey } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { VerificationResult } from "@/types";
+import { AnalysisProgress, type AnalysisPhase } from "./analysis-progress";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const ACCEPTED = {
@@ -50,7 +50,21 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   // `rejection` because the answer is "switch tabs", not "take a new photo" —
   // and the file the user already picked stays valid.
   const [misrouted, setMisrouted] = useState<WrongSectionError | null>(null);
+  // Split from `isPredicting` because the two phases need different UI: a real
+  // percentage while bytes are moving, an indeterminate sweep once the server
+  // has the photo and there is nothing left to measure.
+  const [phase, setPhase] = useState<AnalysisPhase>("sending");
+  const [uploaded, setUploaded] = useState(0);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const actionRef = useRef<HTMLDivElement>(null);
+
+  // On a phone the photo fills the screen, so the progress readout can start
+  // life below the fold — the user taps and appears to get nothing back.
+  useEffect(() => {
+    if (isPredicting) {
+      actionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isPredicting]);
 
   const acceptFile = useCallback(
     (f: File) => {
@@ -102,16 +116,30 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
 
   const submit = async () => {
     if (!file) return;
-    setPredicting(true);
+
+    // Order matters: the store's `setError` also clears `isPredicting`, since
+    // an error ends a run. Calling it *after* setPredicting(true) therefore
+    // switched the loading state straight back off, which is why the old
+    // button's spinner never appeared either. Clear first, then start.
     setError(null);
     setRejection(null);
     setMisrouted(null);
+    setPhase("sending");
+    setUploaded(0);
+    setPredicting(true);
+
+    // Once the last byte is in, the wait is the model's, not the network's.
+    const onProgress = (fraction: number) => {
+      setUploaded(fraction);
+      if (fraction >= 1) setPhase("working");
+    };
+
     try {
       let result;
       if (mode === "quality") {
-        result = await api.predictQuality(file);
+        result = await api.predictQuality(file, onProgress);
       } else {
-        result = await api.predictDisease(file);
+        result = await api.predictDisease(file, onProgress);
       }
       setLatest(result);
       router.push("/result");
@@ -145,30 +173,22 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
     }
   };
 
-  const checklist: TKey[] =
-    mode === "quality"
-      ? [
-          "upload.getQuality1",
-          "upload.getQuality2",
-          "upload.getQuality3",
-          "upload.getQuality4",
-        ]
-      : [
-          "upload.getDisease1",
-          "upload.getDisease2",
-          "upload.getDisease3",
-          "upload.getDisease4",
-        ];
-
   return (
-    <div className="grid gap-8 lg:grid-cols-5">
-      {/* Left: drop zone */}
-      <div className="lg:col-span-3">
+    // One column, centred. The old two-column split put the action in a card
+    // beside the photo, which on a phone stacked into a second screenful the
+    // user had to scroll to before anything could happen.
+    <div className="mx-auto w-full max-w-2xl">
+      <div>
         <div
           {...getRootProps()}
           className={cn(
             "relative rounded-3xl border-2 border-dashed transition-all",
-            "min-h-[420px] flex items-center justify-center p-8",
+            "flex items-center justify-center",
+            // The empty dropzone needs presence; once a photo fills it, the
+            // photo sets the height and a tall minimum only adds dead space.
+            previewUrl
+              ? "p-3 sm:p-4"
+              : "min-h-[320px] sm:min-h-[380px] p-6 sm:p-8",
             isDragActive
               ? "border-leaf-700 bg-leaf-50 dark:border-leaf-300 dark:bg-leaf-900/20"
               : "border-[var(--border)] bg-[var(--bg-elev)]"
@@ -182,14 +202,14 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
               <img
                 src={previewUrl}
                 alt="Preview"
-                className="max-h-[420px] w-full rounded-2xl object-contain"
+                className="max-h-[34vh] w-full rounded-2xl object-contain sm:max-h-[420px]"
               />
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   reset();
                 }}
-                className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                className="absolute top-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
                 aria-label={t("upload.remove")}
               >
                 <X className="h-4 w-4" />
@@ -204,7 +224,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
               <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
                 <ImagePlus className="h-6 w-6" />
               </div>
-              <h3 className="mt-5 font-display text-2xl tracking-tight">
+              <h3 className="mt-5 font-display text-xl sm:text-2xl tracking-tight">
                 {t("upload.dropTitle")}
               </h3>
               <p className="mt-2 text-sm text-[var(--fg-muted)]">
@@ -212,7 +232,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
               </p>
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                <Button onClick={open} variant="primary">
+                <Button onClick={open} variant="primary" className="w-full sm:w-auto">
                   <ImagePlus className="h-4 w-4" />
                   {t("upload.choose")}
                 </Button>
@@ -222,6 +242,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                     onCameraClick();
                   }}
                   variant="outline"
+                  className="w-full sm:w-auto"
                 >
                   <Camera className="h-4 w-4" />
                   {t("upload.camera")}
@@ -238,6 +259,29 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
             </div>
           )}
         </div>
+
+        {/* The action, directly under the photo it acts on. */}
+        {file && (
+          <div className="mt-4" ref={actionRef}>
+            {isPredicting ? (
+              <AnalysisProgress phase={phase} uploaded={uploaded} mode={mode} />
+            ) : (
+              <>
+                <Button
+                  onClick={submit}
+                  size="lg"
+                  className="w-full"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {t("upload.run")}
+                </Button>
+                <p className="mt-3 text-center text-xs text-[var(--fg-muted)]">
+                  {t("upload.speed")}
+                </p>
+              </>
+            )}
+          </div>
+        )}
 
         {misrouted && (
           <div
@@ -310,51 +354,6 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
             {error}
           </div>
         )}
-      </div>
-
-      {/* Right: actions */}
-      <div className="lg:col-span-2">
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-7 sticky top-24">
-          <h2 className="font-display text-3xl tracking-tight">
-            {t("upload.runTitle")}
-          </h2>
-          <p className="mt-3 text-sm text-[var(--fg-muted)] leading-relaxed">
-            {mode === "quality" ? t("upload.runQuality") : t("upload.runDisease")}
-          </p>
-
-          <ul className="mt-6 space-y-2.5 text-sm">
-            {checklist.map((key) => (
-              <li key={key} className="flex items-start gap-2.5">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 text-leaf-700 dark:text-leaf-300 shrink-0" />
-                <span className="text-[var(--fg-muted)]">{t(key)}</span>
-              </li>
-            ))}
-          </ul>
-
-          <Button
-            onClick={submit}
-            disabled={!file || isPredicting}
-            isLoading={isPredicting}
-            size="lg"
-            className="mt-7 w-full"
-          >
-            {isPredicting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t("upload.running")}
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                {t("upload.run")}
-              </>
-            )}
-          </Button>
-
-          <p className="mt-4 text-center text-xs text-[var(--fg-muted)]">
-            {t("upload.speed")}
-          </p>
-        </div>
       </div>
     </div>
   );

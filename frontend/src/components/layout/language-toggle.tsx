@@ -38,7 +38,9 @@ export function LanguageToggle({ className }: { className?: string }) {
             aria-pressed={active}
             title={l.label}
             className={cn(
-              "rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
+              // min-h-8 rather than padding alone: at py-1 the segments were
+              // 24px tall, below a comfortable thumb target on a phone.
+              "inline-flex min-h-8 items-center rounded-full px-2.5 text-xs font-semibold transition-colors",
               active
                 ? "bg-leaf-700 text-parchment dark:bg-leaf-300 dark:text-leaf-900"
                 : "text-[var(--fg-muted)] hover:text-[var(--fg)]"

@@ -252,14 +252,14 @@ export function ResultView() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-7 shadow-card"
+              className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-5 sm:p-7 shadow-card"
             >
               <div className="flex items-start justify-between gap-4">
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
                     {t("result.diseaseSection")}
                   </p>
-                  <h2 className="mt-2 font-display text-3xl tracking-tight">
+                  <h2 className="mt-2 font-display text-2xl sm:text-3xl tracking-tight">
                     {diseaseLabel}
                   </h2>
                 </div>
@@ -267,13 +267,13 @@ export function ResultView() {
                   <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
                     {t("common.confidence")}
                   </p>
-                  <p className="mt-1 font-display text-3xl text-leaf-700 dark:text-leaf-300">
+                  <p className="mt-1 font-display text-2xl sm:text-3xl text-leaf-700 dark:text-leaf-300">
                     {formatPercent(disease.confidence, 0)}
                   </p>
                 </div>
               </div>
 
-              <p className="mt-5 text-[var(--fg-muted)] leading-relaxed">
+              <p className="mt-4 text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed">
                 {diseaseDescription(disease.label, disease.description, lang)}
               </p>
 
@@ -325,31 +325,40 @@ export function ResultView() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: showDisease ? 0.15 : 0.1 }}
-              className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-7 shadow-card"
+              className="rounded-3xl border border-[var(--border)] bg-[var(--bg-elev)] p-5 sm:p-7 shadow-card"
             >
+              {/*
+                Grade and confidence sit on one row; the market-value chip gets
+                its own line beneath. It used to live inside the <h2> next to
+                the grade, where a phrase as long as "Highest — premium export
+                pricing" was squeezed into a narrow column and wrapped to four
+                lines inside a pill.
+              */}
               <div className="flex items-start justify-between gap-4">
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
                     {t("result.qualitySection")}
                   </p>
-                  <h2 className="mt-2 font-display text-3xl tracking-tight flex items-center gap-3">
+                  <h2 className="mt-2 font-display text-2xl sm:text-3xl tracking-tight">
                     {gradeLabel}
-                    <Badge tone={gradeTone(quality.grade)}>
-                      {marketValue(quality.grade, quality.market_value, lang)}
-                    </Badge>
                   </h2>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs uppercase tracking-[0.18em] text-[var(--fg-muted)]">
                     {t("common.confidence")}
                   </p>
-                  <p className="mt-1 font-display text-3xl text-tobacco-700 dark:text-tobacco-300">
+                  <p className="mt-1 font-display text-2xl sm:text-3xl text-tobacco-700 dark:text-tobacco-300">
                     {formatPercent(quality.confidence, 0)}
                   </p>
                 </div>
               </div>
 
-              <p className="mt-5 text-[var(--fg-muted)] leading-relaxed">
+              <Badge tone={gradeTone(quality.grade)} className="mt-3">
+                <Award className="h-3 w-3 shrink-0" />
+                {marketValue(quality.grade, quality.market_value, lang)}
+              </Badge>
+
+              <p className="mt-4 text-sm sm:text-base text-[var(--fg-muted)] leading-relaxed">
                 {gradeDescription(quality.grade, quality.description, lang)}
               </p>
 

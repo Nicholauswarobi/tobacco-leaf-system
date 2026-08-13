@@ -62,7 +62,7 @@ export function Navbar() {
           <Logo />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-1">
           {NAV.map((item) => {
             const active = item.href === activeHref;
             return (
@@ -87,17 +87,17 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <InstallButton className="hidden sm:inline-flex" />
+          <InstallButton compact className="hidden sm:inline-flex" />
           <Link
             href="/disease"
-            className="hidden lg:inline-flex h-9 items-center rounded-full bg-leaf-700 px-4 text-sm font-medium text-parchment hover:bg-leaf-800 transition-colors dark:bg-leaf-300 dark:text-leaf-900 dark:hover:bg-leaf-200"
+            className="hidden xl:inline-flex h-9 items-center rounded-full bg-leaf-700 px-4 text-sm font-medium text-parchment hover:bg-leaf-800 transition-colors dark:bg-leaf-300 dark:text-leaf-900 dark:hover:bg-leaf-200"
           >
             {t("nav.start")}
           </Link>
           <LanguageToggle className="hidden sm:inline-flex" />
           <ThemeToggle />
           <button
-            className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-elev)]"
+            className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-elev)]"
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle navigation"
           >
@@ -109,7 +109,7 @@ export function Navbar() {
       {/* Mobile drawer */}
       <div
         className={cn(
-          "md:hidden border-t border-[var(--border)] bg-[var(--bg)] transition-[max-height,opacity]",
+          "lg:hidden border-t border-[var(--border)] bg-[var(--bg)] transition-[max-height,opacity]",
           // Tall enough for every row including the install button. It used to
           // cap at max-h-80, which silently clipped whatever sat at the bottom;
           // scrolling rather than hiding is the safer failure mode as rows are

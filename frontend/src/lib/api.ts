@@ -1,8 +1,24 @@
 /**
  * API client — talks to the FastAPI backend.
  *
- * The base URL is read from NEXT_PUBLIC_API_URL at build time.
- * Falls back to the dev default localhost:8000.
+ * By default every call goes to `/backend/*` on **this same origin**, which
+ * `next.config.mjs` proxies to the FastAPI server. That indirection is what
+ * makes the app work from a phone.
+ *
+ * Calling `http://localhost:8000` directly only ever works on the machine
+ * running the backend. Open the site from a phone — over ngrok, a tunnel, or
+ * the LAN — and `localhost` means *the phone*, so the request goes nowhere.
+ * Worse, a page served over https cannot call an http address at all: the
+ * browser blocks it as mixed content before a packet is sent. Both failures
+ * surface identically, as a fetch that simply rejects.
+ *
+ * Going through the same origin sidesteps all of it — no second tunnel, no
+ * mixed content, and no CORS, since the browser sees only one origin.
+ *
+ * Set NEXT_PUBLIC_API_URL to an absolute URL to bypass the proxy and call a
+ * backend directly (the split-deployment case: frontend on Vercel, backend
+ * elsewhere). It must be an address the *browser* can reach, and it must be
+ * https if the page is.
  */
 import type {
   PredictionResponse,
@@ -12,8 +28,10 @@ import type {
   VerificationResult,
 } from "@/types";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "/backend").replace(
+  /\/+$/,
+  ""
+);
 
 /** Backend code for a Tobacco Verification rejection. */
 export const NOT_A_TOBACCO_LEAF = "NOT_A_TOBACCO_LEAF";
@@ -65,6 +83,68 @@ export class WrongSectionError extends Error {
   get suggestedMode(): "disease" | "quality" {
     return this.routing.suggested_mode;
   }
+}
+
+/** Progress of the photo travelling to the server, 0–1. */
+export type UploadProgress = (fraction: number) => void;
+
+/**
+ * POST a file and report real upload progress.
+ *
+ * `fetch` cannot report how much of a request body has been sent, and on a
+ * phone over mobile data the upload is the slow part — several seconds for a
+ * 3 MB photo. XMLHttpRequest is the only API that exposes it, so it is used
+ * here rather than showing a spinner that tells the user nothing.
+ *
+ * The response is converted back into a `Response` so callers keep using the
+ * same `handle()` path as every other request.
+ */
+function postFile(
+  url: string,
+  file: File,
+  onProgress?: UploadProgress
+): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.responseType = "text";
+
+    if (onProgress) {
+      xhr.upload.addEventListener("progress", (e) => {
+        // Without Content-Length there is nothing honest to report, so the
+        // caller is left on its indeterminate state instead of being fed a
+        // made-up number.
+        if (e.lengthComputable && e.total > 0) {
+          onProgress(Math.min(1, e.loaded / e.total));
+        }
+      });
+      xhr.upload.addEventListener("load", () => onProgress(1));
+    }
+
+    xhr.addEventListener("load", () => {
+      resolve(
+        new Response(xhr.responseText, {
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+    });
+    xhr.addEventListener("error", () =>
+      reject(new TypeError("Network request failed"))
+    );
+    xhr.addEventListener("abort", () =>
+      reject(new DOMException("Aborted", "AbortError"))
+    );
+    xhr.addEventListener("timeout", () =>
+      reject(new TypeError("Network request timed out"))
+    );
+
+    xhr.send(fd);
+  });
 }
 
 async function handle<T>(res: Response): Promise<T> {
@@ -157,23 +237,27 @@ export const api = {
     return handle(res);
   },
 
-  async predictDisease(file: File): Promise<PredictionResponse> {
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch(`${API_BASE}/api/predict/disease`, {
-      method: "POST",
-      body: fd,
-    });
+  async predictDisease(
+    file: File,
+    onProgress?: UploadProgress
+  ): Promise<PredictionResponse> {
+    const res = await postFile(
+      `${API_BASE}/api/predict/disease`,
+      file,
+      onProgress
+    );
     return handle(res);
   },
 
-  async predictQuality(file: File): Promise<PredictionResponse> {
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch(`${API_BASE}/api/predict/quality`, {
-      method: "POST",
-      body: fd,
-    });
+  async predictQuality(
+    file: File,
+    onProgress?: UploadProgress
+  ): Promise<PredictionResponse> {
+    const res = await postFile(
+      `${API_BASE}/api/predict/quality`,
+      file,
+      onProgress
+    );
     return handle(res);
   },
 

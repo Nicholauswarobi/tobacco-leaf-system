@@ -110,17 +110,30 @@ self.addEventListener("fetch", (event) => {
 
   const sameOrigin = url.origin === self.location.origin;
 
-  if (!sameOrigin) {
-    // Uploaded leaf photos live on the backend origin. Their filenames are
-    // per-prediction and immutable, so a cache hit is always correct — this is
-    // what lets the history and result pages render offline.
-    if (url.pathname.startsWith("/uploads/")) {
-      event.respondWith(cacheFirst(request, IMAGE_CACHE));
-    }
-    // Everything else cross-origin (the whole /api surface) goes to the
-    // network untouched.
+  // The backend is normally reached through the same-origin `/backend/*`
+  // proxy, so "same origin" is no longer enough to mean "safe to cache". These
+  // two checks must come before any of the same-origin handling below.
+  const isApi =
+    url.pathname.startsWith("/api/") || url.pathname.startsWith("/backend/api/");
+
+  // Uploaded leaf photos, whether proxied or fetched from the backend origin
+  // directly. Their filenames are per-prediction and immutable, so a cache hit
+  // is always correct — this is what lets history and results render offline.
+  const isUpload =
+    url.pathname.startsWith("/uploads/") ||
+    url.pathname.startsWith("/backend/uploads/");
+
+  // History, health and stats must always be live. A stale grade, or a stale
+  // "model loaded" flag, is worse than an error.
+  if (isApi) return;
+
+  if (isUpload) {
+    event.respondWith(cacheFirst(request, IMAGE_CACHE));
     return;
   }
+
+  // Anything else on another origin is left entirely alone.
+  if (!sameOrigin) return;
 
   // React Server Component payloads for client-side navigation. They are
   // versioned against the running build; serving a stale one produces a

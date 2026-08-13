@@ -32,7 +32,18 @@ import { useInstall, type Platform } from "./use-install";
  * On Chromium it fires the native prompt. Everywhere else it opens the steps
  * for that browser, since only Chromium exposes an install API.
  */
-export function InstallButton({ className }: { className?: string }) {
+export function InstallButton({
+  className,
+  compact = false,
+}: {
+  className?: string;
+  /**
+   * Hide the label below `xl`, leaving just the icon. From `lg` up, the full
+   * navigation shares one row with both toggles and this button, and the
+   * label is what tips that row past the viewport width.
+   */
+  compact?: boolean;
+}) {
   const { t } = useI18n();
   const { method, isStandalone, ready, platform, isSecureContext, promptToInstall } =
     useInstall();
@@ -56,8 +67,10 @@ export function InstallButton({ className }: { className?: string }) {
           className
         )}
       >
-        <Download className="h-4 w-4" />
-        <span>{t("install.button")}</span>
+        <Download className="h-4 w-4 shrink-0" />
+        <span className={cn(compact && "hidden xl:inline")}>
+          {t("install.button")}
+        </span>
       </button>
 
       {showSteps && (
@@ -109,17 +122,28 @@ export function InstallBanner() {
 
   return (
     <>
+      {/*
+        A fixed bar sits on top of whatever is at the bottom of the page — on
+        the analysis pages that was the "Check now" button and the progress
+        readout, both invisible behind it. This spacer occupies the same height
+        in normal flow so the end of the document can always be scrolled clear.
+      */}
+      <div aria-hidden className="h-28 sm:hidden" />
+
       <div className="fixed inset-x-0 bottom-0 z-50 p-3 sm:hidden">
         <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-elev)] p-3 shadow-card">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-leaf-700 dark:bg-leaf-300">
             <Download className="h-5 w-5 text-parchment dark:text-leaf-900" />
           </span>
 
+          {/* Clamped so a long translation cannot grow this bar into a third
+              of the screen — it overlays the page, so its height is a cost
+              paid by every page underneath it. */}
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-[var(--fg)]">
+            <p className="line-clamp-1 text-sm font-semibold text-[var(--fg)]">
               {t("install.bannerTitle")}
             </p>
-            <p className="text-xs text-[var(--fg-muted)]">
+            <p className="line-clamp-2 text-xs text-[var(--fg-muted)]">
               {t("install.bannerBody")}
             </p>
           </div>
