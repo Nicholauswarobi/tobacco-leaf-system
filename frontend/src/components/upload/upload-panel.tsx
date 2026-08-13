@@ -133,7 +133,11 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
           }
         );
       } else {
-        // Whatever the API said, the reader can only act on plain language.
+        // Whatever the API said, the reader can only act on plain language —
+        // but swallowing it entirely leaves "the check did not finish" with no
+        // way to tell a dropped connection from a rejected request, so the
+        // real cause goes to the console for whoever is debugging.
+        console.error("[TobaccoScan] prediction request failed:", e);
         setError(t("upload.failed"));
       }
     } finally {

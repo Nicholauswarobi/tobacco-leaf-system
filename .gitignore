@@ -20,3 +20,9 @@ node_modules
 *.tiff
 *.ico
 *.svg
+
+# …with the app icons as the standing exception. The PWA is not installable
+# without them, so they are source, not output. Regenerate with:
+#   python frontend/scripts/generate_icons.py
+!frontend/public/icons/*.png
+!frontend/public/icons/*.ico

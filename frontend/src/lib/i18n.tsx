@@ -248,6 +248,38 @@ const EN = {
   "footer.use": "Use it",
   "footer.learn": "Learn",
   "footer.rights": "Built for the field.",
+
+  // ── Install / app ──
+  "install.button": "Install app",
+  "install.bannerTitle": "Put TobaccoScan on your phone",
+  "install.bannerBody": "Open it from your home screen, like any other app.",
+  "install.dismiss": "Close",
+  "install.done": "Installed. Look for TobaccoScan on your home screen.",
+  "install.stepsTitle": "Add to your home screen",
+  "install.iosStep1": "Tap the Share button at the bottom of Safari.",
+  "install.iosStep2": "Scroll down and tap “Add to Home Screen”.",
+  "install.iosStep3": "Tap “Add”. TobaccoScan appears with your other apps.",
+  "install.gotIt": "Got it",
+  "install.androidStep1": "Tap the ⋮ menu at the top right of your browser.",
+  "install.androidStep2": "Tap “Install app” or “Add to Home screen”.",
+  "install.androidStep3": "Confirm. TobaccoScan appears with your other apps.",
+  "install.desktopStep1":
+    "Click the install icon at the right of the address bar.",
+  "install.desktopStep2": "Click “Install”.",
+  "install.insecureTitle": "This address cannot be installed",
+  "install.insecureBody":
+    "The page was opened over http://, and phones only allow installing from https:// (or localhost). Open the site at its https:// address and the install option will appear.",
+  "install.updateReady": "A new version of TobaccoScan is ready.",
+  "install.updateAction": "Update",
+
+  // ── Offline ──
+  "offline.title": "You are offline",
+  "offline.body":
+    "This page has not been opened on this phone before, so there is no saved copy to show. Pages you have already visited still work without a network.",
+  "offline.backOnline": "You are back online — try again.",
+  "offline.viewSaved": "Open saved checks",
+  "offline.note":
+    "Checking a leaf needs a connection, because the photo is analysed on the server.",
 } as const;
 
 export type TKey = keyof typeof EN;
@@ -474,6 +506,39 @@ const SW: Record<TKey, string> = {
   "footer.use": "Tumia",
   "footer.learn": "Jifunze",
   "footer.rights": "Imetengenezwa kwa ajili ya shambani.",
+
+  // ── Kusakinisha programu ──
+  "install.button": "Sakinisha programu",
+  "install.bannerTitle": "Weka TobaccoScan kwenye simu yako",
+  "install.bannerBody": "Ifungue kutoka skrini yako ya mwanzo, kama programu nyingine.",
+  "install.dismiss": "Funga",
+  "install.done": "Imesakinishwa. Tafuta TobaccoScan kwenye skrini yako ya mwanzo.",
+  "install.stepsTitle": "Ongeza kwenye skrini ya mwanzo",
+  "install.iosStep1": "Gusa kitufe cha Share chini ya Safari.",
+  "install.iosStep2": "Teremsha chini kisha gusa “Add to Home Screen”.",
+  "install.iosStep3": "Gusa “Add”. TobaccoScan itaonekana pamoja na programu zako.",
+  "install.gotIt": "Nimeelewa",
+  "install.androidStep1": "Gusa menyu ya ⋮ juu kulia kwenye kivinjari chako.",
+  "install.androidStep2": "Gusa “Install app” au “Add to Home screen”.",
+  "install.androidStep3":
+    "Thibitisha. TobaccoScan itaonekana pamoja na programu zako.",
+  "install.desktopStep1":
+    "Bofya alama ya kusakinisha upande wa kulia wa sehemu ya anwani.",
+  "install.desktopStep2": "Bofya “Install”.",
+  "install.insecureTitle": "Anwani hii haiwezi kusakinishwa",
+  "install.insecureBody":
+    "Ukurasa umefunguliwa kwa http://, na simu huruhusu kusakinisha kutoka https:// pekee (au localhost). Fungua tovuti kwa anwani yake ya https:// na chaguo la kusakinisha litaonekana.",
+  "install.updateReady": "Toleo jipya la TobaccoScan liko tayari.",
+  "install.updateAction": "Sasisha",
+
+  // ── Bila mtandao ──
+  "offline.title": "Huna mtandao",
+  "offline.body":
+    "Ukurasa huu haujafunguliwa kwenye simu hii awali, hivyo hakuna nakala iliyohifadhiwa ya kuonyesha. Kurasa ulizokwisha kufungua bado zinafanya kazi bila mtandao.",
+  "offline.backOnline": "Mtandao umerudi — jaribu tena.",
+  "offline.viewSaved": "Fungua upimaji uliohifadhiwa",
+  "offline.note":
+    "Kupima jani kunahitaji mtandao, kwa sababu picha huchambuliwa kwenye seva.",
 };
 
 const DICTS: Record<Lang, Record<TKey, string>> = { en: EN, sw: SW };

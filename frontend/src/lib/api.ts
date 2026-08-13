@@ -73,6 +73,17 @@ async function handle<T>(res: Response): Promise<T> {
     try {
       const body = await res.json();
       message = body.message || body.detail || message;
+      // FastAPI request-validation failures arrive as a bare "Validation
+      // error" with the real cause buried in `details`. Folding the first one
+      // into the message is the difference between a developer seeing
+      // "Validation error" and seeing "body.file: Field required".
+      if (Array.isArray(body.details) && body.details.length > 0) {
+        const first = body.details[0];
+        const where = Array.isArray(first?.loc) ? first.loc.join(".") : "";
+        message = [message, [where, first?.msg].filter(Boolean).join(": ")]
+          .filter(Boolean)
+          .join(" — ");
+      }
       if (body.code === NOT_A_TOBACCO_LEAF) {
         throw new NotATobaccoLeafError(message, body.verification);
       }

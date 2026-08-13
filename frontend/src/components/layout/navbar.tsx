@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { Logo } from "@/components/ui/logo";
+import { InstallButton } from "@/components/pwa/install-button";
 import { ThemeToggle } from "./theme-toggle";
 import { LanguageToggle } from "./language-toggle";
 import { useAppStore } from "@/store/app-store";
@@ -86,6 +87,7 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <InstallButton className="hidden sm:inline-flex" />
           <Link
             href="/disease"
             className="hidden lg:inline-flex h-9 items-center rounded-full bg-leaf-700 px-4 text-sm font-medium text-parchment hover:bg-leaf-800 transition-colors dark:bg-leaf-300 dark:text-leaf-900 dark:hover:bg-leaf-200"
@@ -107,8 +109,14 @@ export function Navbar() {
       {/* Mobile drawer */}
       <div
         className={cn(
-          "md:hidden overflow-hidden border-t border-[var(--border)] bg-[var(--bg)] transition-[max-height,opacity]",
-          open ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
+          "md:hidden border-t border-[var(--border)] bg-[var(--bg)] transition-[max-height,opacity]",
+          // Tall enough for every row including the install button. It used to
+          // cap at max-h-80, which silently clipped whatever sat at the bottom;
+          // scrolling rather than hiding is the safer failure mode as rows are
+          // added.
+          open
+            ? "max-h-[34rem] overflow-y-auto opacity-100"
+            : "max-h-0 overflow-hidden opacity-0"
         )}
       >
         <div className="flex flex-col px-5 py-4 gap-1">
@@ -139,6 +147,7 @@ export function Navbar() {
             </span>
             <LanguageToggle />
           </div>
+          <InstallButton className="mt-2 w-full justify-center sm:hidden" />
         </div>
       </div>
     </header>

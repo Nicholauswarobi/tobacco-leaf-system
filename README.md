@@ -18,7 +18,8 @@ A full-stack, production-grade system that uses deep learning to detect leaf dis
 - **History** with SQLite persistence and CSV export
 - **Dashboard** with charts (recharts) showing disease pressure and grade mix
 - **Camera capture** on mobile + drag-and-drop upload on desktop
-- **Light/dark themes**, fully responsive, PWA-ready
+- **Light/dark themes**, fully responsive, and **installable to a phone's home
+  screen** as a PWA that still opens offline
 
 ## 📁 Project structure
 
@@ -27,11 +28,12 @@ tobacco-leaf-system/
 ├── frontend/              Next.js 15 + TypeScript + Tailwind
 │   ├── src/
 │   │   ├── app/           App Router pages
-│   │   ├── components/    UI, layout, upload, results, dashboard
+│   │   ├── components/    UI, layout, upload, results, dashboard, pwa
 │   │   ├── lib/           API client, utils
 │   │   ├── store/         Zustand state
 │   │   └── types/         Shared TS types
-│   ├── public/            Static assets, PWA manifest
+│   ├── public/            Static assets, PWA manifest, sw.js, icons/
+│   ├── scripts/           generate_icons.py — regenerates the app icons
 │   └── Dockerfile
 ├── backend/               FastAPI server
 │   ├── app/
@@ -397,6 +399,95 @@ cp ml/saved_models/*.keras backend/saved_models/
 
 Prefer interactive? Open `ml/notebooks/training.ipynb`.
 
+## 📱 Installing on a phone (PWA)
+
+TobaccoScan installs to a phone's home screen and opens full-screen, with no
+browser chrome. The **Install app** button appears in three places: the header
+on desktop, inside the ☰ menu on a phone, and in a one-time banner at the
+bottom of the screen.
+
+- **Android / Chrome / Edge** — tap **Install app**, then confirm.
+- **iPhone / Safari** — tap **Install app** for the steps: Share → *Add to Home
+  Screen* → *Add*. Safari has no install API, so this part is manual on every
+  iOS site.
+
+The button stays visible even where the browser offers no install prompt, and
+opens that browser's own steps instead. That is deliberate: `beforeinstallprompt`
+never fires in `npm run dev` or over plain http, and a button that vanishes in
+exactly those cases looks like a broken feature rather than an unmet
+precondition. If the page is not on https, the steps say so directly.
+
+### ⚠️ It will not install over plain http
+
+This is the one thing that trips people up. Service workers — and therefore
+installability — require a **secure context**: `https://`, or `localhost`
+exactly. Opening `http://192.168.1.42:3000` on your phone across the LAN serves
+the app fine but silently refuses to register the worker, so no install button
+ever appears. Nothing is broken; the origin simply is not trusted.
+
+Three ways to get a real install on a phone:
+
+**1. A quick HTTPS tunnel (fastest for a demo).** Tunnel *both* services — an
+https page cannot call an http API, the browser blocks it as mixed content:
+
+```bash
+cloudflared tunnel --url http://localhost:3000   # → https://<random>.trycloudflare.com
+cloudflared tunnel --url http://localhost:8000   # → https://<other>.trycloudflare.com
+```
+
+Then point the frontend at the tunnelled backend and let the backend accept it:
+
+```ini
+# frontend/.env.local          — rebuild after changing, it is baked in at build time
+NEXT_PUBLIC_API_URL=https://<other>.trycloudflare.com
+
+# backend/.env
+CORS_ORIGINS=["https://<random>.trycloudflare.com"]
+```
+
+```bash
+cd frontend && npm run build && npm start
+```
+
+**2. Deploy it.** Any of the options under [Deployment](#-deployment) gives you
+HTTPS, and the install works from the real URL with nothing extra.
+
+**3. Test on desktop Chrome.** `npm run build && npm start`, open
+`http://localhost:3000` — localhost counts as secure. Install from the icon in
+the address bar. DevTools → *Application* → *Manifest* runs the same checks the
+phone does.
+
+> The service worker is deliberately **disabled in `npm run dev`**. Left on, it
+> serves stale chunks between edits and makes every change look like it failed
+> to apply. Use a production build to test anything PWA-related.
+
+### What works offline
+
+Only what can honestly work offline does:
+
+| Works offline | Needs a connection |
+| ------------- | ------------------ |
+| Pages already visited on that phone | Checking a leaf — the photo is analysed on the server |
+| Leaf photos from past checks | History, dashboard and admin, which read live from the API |
+| The app shell, icons and fonts | |
+
+A page never opened on that phone shows a plain offline screen rather than a
+broken one. Predictions are POSTs and are never cached — replaying a cached
+diagnosis would show a farmer last week's answer for this week's leaf.
+
+### Regenerating the icons
+
+`frontend/public/icons/` is checked in (the repo ignores images by default;
+these are an explicit exception, since the app cannot install without them).
+To change the artwork, edit the palette or geometry and re-run:
+
+```bash
+python frontend/scripts/generate_icons.py
+```
+
+That writes every size, including the separate **maskable** variants Android
+crops to a circle or squircle.
+
 ## 🛠️ Architecture notes
 
 ### Backend
@@ -417,7 +508,9 @@ Prefer interactive? Open `ml/notebooks/training.ipynb`.
 - **Framer Motion** for the result page reveal animations.
 - **Recharts** for dashboard visualizations.
 - **next-themes** for dark/light/system mode.
-- **PWA-ready** via `manifest.webmanifest` (add icons in `frontend/public/icons/`).
+- **Installable PWA** — manifest, icons, and a service worker (`public/sw.js`)
+  that caches the app shell and visited pages but never the API. See
+  [Installing on a phone](#-installing-on-a-phone-pwa).
 
 ### ML Pipeline
 - **Augmentation** baked into the model graph via `RandomFlip`, `RandomRotation`, `RandomZoom`, `RandomContrast`, `RandomBrightness`.
@@ -586,7 +679,9 @@ npm run type-check
 - [x] Zustand state, light/dark mode, responsive mobile-first design
 - [x] Confidence visualizations (bars), recharts dashboard
 - [x] CSV export, JSON export per prediction, share API
-- [x] PWA manifest, SEO metadata
+- [x] Installable PWA — manifest, maskable icons, service worker, offline page
+- [x] In-app install button (Chromium prompt + iOS Share-sheet instructions)
+- [x] SEO metadata
 - [x] Dockerfiles + docker-compose
 - [x] Stub-mode fallback so frontend works without trained weights
 

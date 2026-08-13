@@ -1,24 +1,55 @@
 {
+  "id": "/",
   "name": "TobaccoScan — Tobacco Leaf Diagnostics",
   "short_name": "TobaccoScan",
-  "description": "AI-powered tobacco leaf disease detection and quality grading",
-  "start_url": "/",
+  "description": "Photograph a tobacco leaf to find out whether it is sick, what to spray, and what grade it will fetch.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#f7f3e9",
   "theme_color": "#456838",
   "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Check for disease",
+      "short_name": "Disease",
+      "url": "/disease?source=pwa",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Check quality grade",
+      "short_name": "Quality",
+      "url": "/quality?source=pwa",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ],
   "categories": ["agriculture", "productivity", "utilities"]

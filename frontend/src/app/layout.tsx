@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { LanguageProvider } from "@/lib/i18n";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { ServiceWorker } from "@/components/pwa/service-worker";
+import { InstallBanner } from "@/components/pwa/install-button";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -44,6 +46,32 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "TobaccoScan" }],
   manifest: "/manifest.webmanifest",
+  applicationName: "TobaccoScan",
+  icons: {
+    icon: [
+      { url: "/icons/favicon.ico", sizes: "any" },
+      { url: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icons/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  // iOS ignores the manifest for install behaviour and reads these instead —
+  // without them, "Add to Home Screen" opens the app in a Safari tab with the
+  // browser chrome still showing.
+  appleWebApp: {
+    capable: true,
+    title: "TobaccoScan",
+    statusBarStyle: "default",
+  },
+  formatDetection: { telephone: false },
+  other: {
+    // `appleWebApp.capable` above emits only the modern
+    // `mobile-web-app-capable`, which Safari does not read. iOS before 16.4
+    // honours nothing but this deprecated spelling, and without it the app
+    // opens inside Safari's chrome instead of full screen. Harmless on newer
+    // iOS, which takes `display: standalone` from the manifest.
+    "apple-mobile-web-app-capable": "yes",
+  },
   openGraph: {
     title: "TobaccoScan — Tobacco Leaf Diagnostics",
     description: "Detection of tobacco leaf diseases and quality grading powered by deep learning.",
@@ -80,6 +108,8 @@ export default function RootLayout({
               <main className="flex-1">{children}</main>
               <Footer />
             </div>
+            <ServiceWorker />
+            <InstallBanner />
           </LanguageProvider>
         </ThemeProvider>
       </body>
