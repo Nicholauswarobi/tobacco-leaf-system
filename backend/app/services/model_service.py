@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import hashlib
+import threading
 from pathlib import Path
 from typing import List, Tuple
 
@@ -81,6 +82,12 @@ class ModelService:
     """Holds the loaded verification, disease and quality Keras models."""
 
     def __init__(self) -> None:
+        # Inference now runs in a worker thread (see app/routers/predict.py) so
+        # a leaf being analysed no longer blocks the whole server. Keras models
+        # are not safe to call concurrently from several threads, so the
+        # predictions themselves are serialised here: the event loop is free,
+        # the model is still only ever entered once at a time.
+        self._infer_lock = threading.Lock()
         self.disease_model = None
         self.quality_model = None
         self.verification_model = None
@@ -242,7 +249,8 @@ class ModelService:
             return None
 
         x = self.preprocess(image, size=self.verification_image_size)
-        probs = self.verification_model.predict(x, verbose=0)[0]
+        with self._infer_lock:
+            probs = self.verification_model.predict(x, verbose=0)[0]
         return probs.tolist()
 
     def predict_disease(self, image: Image.Image) -> List[float]:
@@ -251,7 +259,8 @@ class ModelService:
             return self._stub_predict_disease(image)
 
         x = self.preprocess(image)
-        disease_probs = self.disease_model.predict(x, verbose=0)[0]
+        with self._infer_lock:
+            disease_probs = self.disease_model.predict(x, verbose=0)[0]
         return disease_probs.tolist()
 
     def predict_quality(self, image: Image.Image) -> List[float]:
@@ -264,7 +273,8 @@ class ModelService:
             return self._stub_predict_quality(image)
 
         x = self.preprocess(image)
-        quality_probs = self.quality_model.predict(x, verbose=0)[0]
+        with self._infer_lock:
+            quality_probs = self.quality_model.predict(x, verbose=0)[0]
         return quality_probs.tolist()
 
     # ---------- stubs for dev ----------

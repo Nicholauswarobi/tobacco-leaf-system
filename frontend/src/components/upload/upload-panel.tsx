@@ -35,10 +35,8 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   const router = useRouter();
   const { t } = useI18n();
   const setLatest = useAppStore((s) => s.setLatest);
-  const setPredicting = useAppStore((s) => s.setPredicting);
-  const setError = useAppStore((s) => s.setError);
-  const isPredicting = useAppStore((s) => s.isPredicting);
-  const error = useAppStore((s) => s.error);
+  const handoffFile = useAppStore((s) => s.handoffFile);
+  const setHandoffFile = useAppStore((s) => s.setHandoffFile);
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -50,21 +48,51 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
   // `rejection` because the answer is "switch tabs", not "take a new photo",
   // and the file the user already picked stays valid.
   const [misrouted, setMisrouted] = useState<WrongSectionError | null>(null);
-  // Split from `isPredicting` because the two phases need different UI: a real
+  const [error, setError] = useState<string | null>(null);
+  // Local, not global. A run belongs to the panel that started it: if this
+  // component goes away the run is over as far as the UI is concerned, and the
+  // next mount starts clean. Held in the store, this flag could stay `true`
+  // after a run that finished elsewhere and leave the panel stuck on a
+  // progress bar until the page was reloaded.
+  const [busy, setBusy] = useState(false);
+  // Split from `busy` because the two phases need different UI: a real
   // percentage while bytes are moving, an indeterminate sweep once the server
   // has the photo and there is nothing left to measure.
   const [phase, setPhase] = useState<AnalysisPhase>("sending");
   const [uploaded, setUploaded] = useState(0);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const actionRef = useRef<HTMLDivElement>(null);
+  // Identifies the run in flight. Anything that comes back carrying an older
+  // id is a straggler from a submit the user has already moved past, and must
+  // not touch the UI: without this, a slow first response could overwrite the
+  // result of a second, or switch the panel out of its loading state while the
+  // real request was still running.
+  const runIdRef = useRef(0);
+  // The live object URL. Kept in a ref as well as in state so it can be
+  // revoked without making the state updater impure.
+  const previewRef = useRef<string | null>(null);
+
+  const setPreview = useCallback((url: string | null) => {
+    if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    previewRef.current = url;
+    setPreviewUrl(url);
+  }, []);
+
+  // The blob outlives the component unless it is released here.
+  useEffect(() => {
+    return () => {
+      if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+      previewRef.current = null;
+    };
+  }, []);
 
   // On a phone the photo fills the screen, so the progress readout can start
   // life below the fold: the user taps and appears to get nothing back.
   useEffect(() => {
-    if (isPredicting) {
+    if (busy) {
       actionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [isPredicting]);
+  }, [busy]);
 
   const acceptFile = useCallback(
     (f: File) => {
@@ -78,11 +106,18 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
       setRejection(null);
       setMisrouted(null);
       setFile(f);
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(URL.createObjectURL(f));
+      setPreview(URL.createObjectURL(f));
     },
-    [previewUrl, setError, t]
+    [setPreview, t]
   );
+
+  // A photo sent over from the other section, so a leaf that was uploaded to
+  // the wrong analysis does not have to be photographed twice.
+  useEffect(() => {
+    if (!handoffFile) return;
+    acceptFile(handoffFile);
+    setHandoffFile(null);
+  }, [handoffFile, acceptFile, setHandoffFile]);
 
   const onDrop = useCallback(
     (accepted: File[]) => {
@@ -96,7 +131,10 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
     accept: ACCEPTED,
     maxFiles: 1,
     maxSize: MAX_BYTES,
+    // Clicking the box once it holds a photo would re-open the picker on every
+    // stray tap. The explicit buttons below stay available instead.
     noClick: !!file,
+    disabled: busy,
   });
 
   const onCameraClick = () => cameraInputRef.current?.click();
@@ -108,31 +146,40 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
     e.target.value = "";
   };
 
-  const reset = () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  /** Back to an empty panel, ready for the next leaf. */
+  const reset = useCallback(() => {
+    setPreview(null);
     setFile(null);
-    setPreviewUrl(null);
     setError(null);
     setRejection(null);
     setMisrouted(null);
+  }, [setPreview]);
+
+  /** Carry the photo to the section the backend says it belongs in. */
+  const goToSuggestedSection = () => {
+    if (!misrouted) return;
+    const href = misrouted.suggestedMode === "quality" ? "/quality" : "/disease";
+    if (file) setHandoffFile(file);
+    reset();
+    router.push(href);
   };
 
   const submit = async () => {
-    if (!file) return;
+    if (!file || busy) return;
 
-    // Order matters: the store's `setError` also clears `isPredicting`, since
-    // an error ends a run. Calling it *after* setPredicting(true) therefore
-    // switched the loading state straight back off, which is why the old
-    // button's spinner never appeared either. Clear first, then start.
+    const runId = ++runIdRef.current;
+    const isCurrent = () => runIdRef.current === runId;
+
     setError(null);
     setRejection(null);
     setMisrouted(null);
     setPhase("sending");
     setUploaded(0);
-    setPredicting(true);
+    setBusy(true);
 
     // Once the last byte is in, the wait is the model's, not the network's.
     const onProgress = (fraction: number) => {
+      if (!isCurrent()) return;
       setUploaded(fraction);
       if (fraction >= 1) setPhase("working");
     };
@@ -144,9 +191,17 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
       } else {
         result = await api.predictDisease(file, onProgress);
       }
+      if (!isCurrent()) return;
       setLatest(result);
+      // Clear the staged photo *before* leaving. The analysis is finished and
+      // its result now lives in the store, so anything still held here is
+      // stale: leaving it behind meant that coming back to this page could
+      // show the previous leaf already loaded, with the buttons that would
+      // have let the user swap it hidden behind the preview.
+      reset();
       router.push("/result");
     } catch (e: unknown) {
+      if (!isCurrent()) return;
       if (e instanceof WrongSectionError) {
         // The leaf is fine: it just belongs in the other analysis.
         setMisrouted(e);
@@ -172,7 +227,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         setError(t("upload.failed"));
       }
     } finally {
-      setPredicting(false);
+      if (isCurrent()) setBusy(false);
     }
   };
 
@@ -208,16 +263,18 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                 alt="Preview"
                 className="max-h-[34vh] w-full rounded object-contain sm:max-h-[420px]"
               />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  reset();
-                }}
-                className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-sm bg-black/60 text-white hover:bg-black/80"
-                aria-label={t("upload.remove")}
-              >
-                <X className="h-4 w-4" />
-              </button>
+              {!busy && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    reset();
+                  }}
+                  className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-sm bg-black/60 text-white hover:bg-black/80"
+                  aria-label={t("upload.remove")}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
               <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded bg-leaf-700 px-2 py-1 text-xs text-parchment">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 {t("upload.ready")}
@@ -246,12 +303,21 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
           and cancelling it revealed the camera dialog queued behind. Stopping
           propagation on the button could not help: the programmatic click on
           the input is a separate event.
+
+          They also stay on screen once a photo is staged. Hiding them behind
+          the preview left the small ✕ overlay as the only way to change the
+          picture, so a leaf the backend bounced back (not tobacco, or the
+          wrong section) could only be replaced by reloading the page.
         */}
-        {!previewUrl && (
+        {!busy && (
           <div className="mt-2 flex flex-col sm:flex-row gap-2 justify-center">
-            <Button onClick={open} variant="primary" className="w-full sm:w-auto">
+            <Button
+              onClick={open}
+              variant={file ? "outline" : "primary"}
+              className="w-full sm:w-auto"
+            >
               <ImagePlus className="h-4 w-4" />
-              {t("upload.choose")}
+              {file ? t("upload.chooseAnother") : t("upload.choose")}
             </Button>
             <Button
               onClick={onCameraClick}
@@ -259,7 +325,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
               className="w-full sm:w-auto"
             >
               <Camera className="h-4 w-4" />
-              {t("upload.camera")}
+              {file ? t("upload.cameraAgain") : t("upload.camera")}
             </Button>
           </div>
         )}
@@ -276,7 +342,7 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
         {/* The action, directly under the photo it acts on. */}
         {file && (
           <div className="mt-2" ref={actionRef}>
-            {isPredicting ? (
+            {busy ? (
               <AnalysisProgress phase={phase} uploaded={uploaded} mode={mode} />
             ) : (
               <>
@@ -310,24 +376,21 @@ export function UploadPanel({ mode = "disease" }: UploadPanelProps) {
                     ? t("quality.lead")
                     : t("disease.lead")}
                 </p>
-                <Button
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() =>
-                    router.push(
-                      misrouted.suggestedMode === "quality"
-                        ? "/quality"
-                        : "/disease"
-                    )
-                  }
-                >
-                  {t("upload.goTo", {
-                    section:
-                      misrouted.suggestedMode === "quality"
-                        ? t("nav.quality")
-                        : t("nav.disease"),
-                  })}
-                </Button>
+                {/* Two ways out, because there are two things the user might
+                    have meant. The photo travels with the first one. */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button variant="primary" onClick={goToSuggestedSection}>
+                    {t("upload.goTo", {
+                      section:
+                        misrouted.suggestedMode === "quality"
+                          ? t("nav.quality")
+                          : t("nav.disease"),
+                    })}
+                  </Button>
+                  <Button variant="outline" onClick={reset}>
+                    {t("upload.tryAnother")}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

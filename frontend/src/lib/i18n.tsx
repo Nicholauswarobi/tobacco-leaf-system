@@ -104,6 +104,10 @@ const EN = {
     "JPG, PNG or WebP, up to 10 MB. Use daylight, fill the frame with one leaf, and photograph the top side.",
   "upload.choose": "Choose photo",
   "upload.camera": "Use camera",
+  // Shown once a photo is staged: the same two controls, relabelled, so
+  // swapping the picture is always one tap away.
+  "upload.chooseAnother": "Choose a different photo",
+  "upload.cameraAgain": "Take a new photo",
   "upload.ready": "Ready to check",
   "upload.remove": "Remove photo",
   "upload.runTitle": "Check the leaf",
@@ -370,6 +374,8 @@ const SW: Record<TKey, string> = {
     "JPG, PNG au WebP, hadi MB 10. Tumia mwanga wa mchana, jani moja lijaze picha, na piga upande wa juu wa jani.",
   "upload.choose": "Chagua picha",
   "upload.camera": "Tumia kamera",
+  "upload.chooseAnother": "Chagua picha nyingine",
+  "upload.cameraAgain": "Piga picha mpya",
   "upload.ready": "Tayari kupimwa",
   "upload.remove": "Ondoa picha",
   "upload.runTitle": "Pima jani",

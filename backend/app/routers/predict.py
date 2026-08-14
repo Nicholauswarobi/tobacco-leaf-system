@@ -6,8 +6,17 @@ Every route here follows the same pipeline:
 
 Verification runs *before* the upload is written to disk, so a rejected image
 never costs a file, a history row, or a downstream inference.
+
+Every blocking step - Keras inference, the colour screens, the disk write, the
+SQLite insert - is dispatched with `run_in_threadpool`. These handlers are
+`async def` because they have to await the upload body, and anything blocking
+called directly from one of them stalls the *entire* server for its duration:
+on CPU that is a second or more per leaf, during which uvicorn cannot accept
+the next upload, serve a result image, or answer a health check. The work is
+the same, it simply no longer happens on the event loop.
 """
 from fastapi import APIRouter, File, UploadFile, HTTPException, status, Query
+from fastapi.concurrency import run_in_threadpool
 
 from app.utils.image_utils import validate_and_load, save_upload
 from app.services.prediction_service import (
@@ -60,7 +69,7 @@ async def verify(file: UploadFile = File(...)) -> VerificationResponse:
 
     # verify_or_raise, so a rejection produces the same 422 body here as it
     # does on the prediction routes.
-    outcome = verification_service.verify_or_raise(image)
+    outcome = await run_in_threadpool(verification_service.verify_or_raise, image)
 
     return VerificationResponse(
         verification=_to_verification_result(outcome),
@@ -79,12 +88,14 @@ async def predict_disease(file: UploadFile = File(...)) -> PredictionResponse:
     image, raw, ext = await validate_and_load(file)
 
     # Stage 1: nothing is written and no downstream model runs until this passes.
-    outcome = verification_service.verify_or_raise(image)
+    outcome = await run_in_threadpool(verification_service.verify_or_raise, image)
 
-    _, public_url = save_upload(raw, ext)
+    _, public_url = await run_in_threadpool(save_upload, raw, ext)
 
     try:
-        result = predict_disease_only(image, image_url=public_url, verification=outcome)
+        result = await run_in_threadpool(
+            predict_disease_only, image, public_url, outcome
+        )
     except (NotATobaccoLeafError, WrongSectionError):
         raise  # handled globally: keeps one rejection shape across the API
     except Exception as exc:  # noqa: BLE001
@@ -93,7 +104,7 @@ async def predict_disease(file: UploadFile = File(...)) -> PredictionResponse:
             detail=f"Disease prediction failed: {exc}",
         ) from exc
 
-    history_service.save(result)
+    await run_in_threadpool(history_service.save, result)
     return result
 
 
@@ -107,12 +118,14 @@ async def predict_quality(file: UploadFile = File(...)) -> PredictionResponse:
     """Verify, then run quality grading, persist a history record, return JSON."""
     image, raw, ext = await validate_and_load(file)
 
-    outcome = verification_service.verify_or_raise(image)
+    outcome = await run_in_threadpool(verification_service.verify_or_raise, image)
 
-    _, public_url = save_upload(raw, ext)
+    _, public_url = await run_in_threadpool(save_upload, raw, ext)
 
     try:
-        result = predict_quality_only(image, image_url=public_url, verification=outcome)
+        result = await run_in_threadpool(
+            predict_quality_only, image, public_url, outcome
+        )
     except (NotATobaccoLeafError, WrongSectionError):
         raise
     except Exception as exc:  # noqa: BLE001
@@ -121,7 +134,7 @@ async def predict_quality(file: UploadFile = File(...)) -> PredictionResponse:
             detail=f"Quality prediction failed: {exc}",
         ) from exc
 
-    history_service.save(result)
+    await run_in_threadpool(history_service.save, result)
     return result
 
 
@@ -138,17 +151,19 @@ async def predict(
     """Run disease + quality prediction together. Use mode='disease' or mode='quality' to run only one."""
     image, raw, ext = await validate_and_load(file)
 
-    outcome = verification_service.verify_or_raise(image)
+    outcome = await run_in_threadpool(verification_service.verify_or_raise, image)
 
-    _, public_url = save_upload(raw, ext)
+    _, public_url = await run_in_threadpool(save_upload, raw, ext)
+
+    if mode == "quality":
+        run = predict_quality_only
+    elif mode == "disease":
+        run = predict_disease_only
+    else:
+        run = predict_full
 
     try:
-        if mode == "quality":
-            result = predict_quality_only(image, image_url=public_url, verification=outcome)
-        elif mode == "disease":
-            result = predict_disease_only(image, image_url=public_url, verification=outcome)
-        else:
-            result = predict_full(image, image_url=public_url, verification=outcome)
+        result = await run_in_threadpool(run, image, public_url, outcome)
     except (NotATobaccoLeafError, WrongSectionError):
         raise
     except Exception as exc:  # noqa: BLE001
@@ -157,5 +172,5 @@ async def predict(
             detail=f"Prediction failed: {exc}",
         ) from exc
 
-    history_service.save(result)
+    await run_in_threadpool(history_service.save, result)
     return result

@@ -30,10 +30,16 @@ async def lifespan(app: FastAPI):
         model_service.load_models()
         logger.info("Models loaded successfully")
     except Exception as exc:  # noqa: BLE001
-        # Don't crash the server if the model file is missing, fall back
-        # to a stub predictor so the rest of the API stays usable.
+        # Don't crash the server if a model file is missing or unreadable, fall
+        # back to a stub predictor so the rest of the API stays usable.
+        #
+        # These set the two real flags. `use_stub` is a read-only property, so
+        # assigning to it raised AttributeError *inside this handler* and took
+        # the whole startup down: the one path meant to keep the server alive
+        # was the one that killed it.
         logger.warning("Model load failed (%s). Using stub predictor.", exc)
-        model_service.use_stub = True
+        model_service.use_disease_stub = model_service.disease_model is None
+        model_service.use_quality_stub = model_service.quality_model is None
 
     yield
     logger.info("Shutting down...")
