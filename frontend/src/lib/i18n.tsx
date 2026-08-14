@@ -149,6 +149,9 @@ const EN = {
   "result.qualitySection": "Quality grade",
   "result.againTitle": "Check another leaf",
   "result.againBody": "Take the next photo in {section}, or change section.",
+  "result.emptyTitle": "No result to show yet.",
+  "result.emptyBody":
+    "Check a leaf and its answer will appear here, and stay here until you check the next one.",
   "result.againButton": "Check another in {section}",
   "result.goOther": "Go to {section}",
   "result.noQualityModel":
@@ -417,6 +420,9 @@ const SW: Record<TKey, string> = {
   "result.qualitySection": "Daraja la ubora",
   "result.againTitle": "Pima jani lingine",
   "result.againBody": "Piga picha nyingine kwenye {section}, au badilisha sehemu.",
+  "result.emptyTitle": "Bado hakuna jibu la kuonyesha.",
+  "result.emptyBody":
+    "Pima jani na jibu lake litaonekana hapa, na litabaki hapa mpaka upime jani lingine.",
   "result.againButton": "Pima lingine kwenye {section}",
   "result.goOther": "Nenda {section}",
   "result.noQualityModel":

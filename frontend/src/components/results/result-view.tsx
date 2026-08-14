@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Leaf,
   Award,
@@ -48,14 +48,64 @@ export function ResultView() {
   const { t, lang } = useI18n();
   const latest = useAppStore((s) => s.latest);
 
-  useEffect(() => {
-    if (!latest) router.replace("/disease");
-  }, [latest, router]);
+  /*
+   * Whether the saved result has been read back out of localStorage yet.
+   *
+   * This gate is what stops a finished diagnosis from vanishing on its own.
+   * Zustand hands React `getInitialState` for the hydration render, and that
+   * is the store as first declared, `latest: null`, regardless of what is in
+   * storage. So on any real page load of this route there is exactly one
+   * commit where the result looks absent, and effects run on it. An automatic
+   * `router.replace("/disease")` used to sit here and fired during that
+   * commit: the result appeared and was pulled away a frame later, with
+   * nothing clicked and the answer still sitting in storage.
+   *
+   * Starts `false` even though hydration is synchronous, so the first client
+   * render matches the prerendered HTML instead of tripping a hydration
+   * mismatch.
+   */
+  const [hydrated, setHydrated] = useState(false);
 
-  if (!latest) {
+  useEffect(() => {
+    if (useAppStore.persist.hasHydrated()) {
+      setHydrated(true);
+      return;
+    }
+    return useAppStore.persist.onFinishHydration(() => setHydrated(true));
+  }, []);
+
+  if (!hydrated) {
     return (
       <div className="mx-auto max-w-2xl py-32 text-center">
         <p className="text-[var(--fg-muted)]">{t("common.loading")}</p>
+      </div>
+    );
+  }
+
+  // Genuinely nothing to show: say so and offer the way forward. Navigating
+  // away automatically would be indistinguishable, to the person holding the
+  // phone, from the app throwing their diagnosis away.
+  if (!latest) {
+    return (
+      <div className="mx-auto max-w-2xl px-3 py-24 text-center">
+        <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded bg-leaf-100 text-leaf-700 dark:bg-leaf-800/40 dark:text-leaf-300">
+          <Leaf className="h-6 w-6" />
+        </div>
+        <h1 className="mt-3 font-display text-3xl tracking-tight">
+          {t("result.emptyTitle")}
+        </h1>
+        <p className="mx-auto mt-2 max-w-md text-sm text-[var(--fg-muted)]">
+          {t("result.emptyBody")}
+        </p>
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <Button onClick={() => router.push("/disease")}>
+            <ImagePlus className="h-4 w-4" />
+            {t("nav.disease")}
+          </Button>
+          <Button variant="outline" onClick={() => router.push("/quality")}>
+            {t("nav.quality")}
+          </Button>
+        </div>
       </div>
     );
   }

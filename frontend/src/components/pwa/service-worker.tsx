@@ -70,9 +70,19 @@ export function ServiceWorker() {
 
     // The new worker takes over only after it activates; reloading then picks
     // up the fresh assets.
+    //
+    // Only when it *replaces* one, though. On the very first visit the page
+    // starts uncontrolled and the freshly installed worker calls
+    // `clients.claim()`, which fires this event too. Reloading on that meant
+    // the first visit refreshed itself at an arbitrary moment, and if the
+    // reader happened to be on their diagnosis at the time, the page they
+    // were reading was torn down and rebuilt under them. There are no stale
+    // assets to escape on a first install: the page already loaded from the
+    // network.
+    const hadController = !!navigator.serviceWorker.controller;
     let refreshing = false;
     const onControllerChange = () => {
-      if (refreshing) return;
+      if (!hadController || refreshing) return;
       refreshing = true;
       window.location.reload();
     };
